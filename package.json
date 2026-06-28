@@ -1,0 +1,17 @@
+{
+  "name": "immomatch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Belgian real estate matching app — AI-powered property scoring based on personal preferences",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build": "npm --prefix client run build && npm --prefix server run build",
+    "start": "npm --prefix server run start",
+    "lint": "npm --prefix client run lint && npm --prefix server run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
