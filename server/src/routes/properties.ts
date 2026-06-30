@@ -7,24 +7,16 @@ const router = Router();
 
 router.post("/import", requireAuth, (req, res) => importProperty(req as AuthenticatedRequest, res));
 
-router.get("/scan", requireAuth, async (req, res: Response) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
+router.post("/scan", requireAuth, async (_req, res: Response) => {
+  // Repondre immediatement et lancer le scan en arriere-plan
+  res.json({ status: "started", message: "Scan lance en arriere-plan. Verifiez les Decouvertes dans quelques minutes." });
 
-  const send = (data: Record<string, unknown>) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
-
-  try {
-    const result = await runDailyScanWithProgress(send);
-    send({ type: "done", ...result });
-  } catch (err) {
-    send({ type: "error", message: err instanceof Error ? err.message : "Erreur" });
-  } finally {
-    res.end();
-  }
+  // Fire and forget — ne pas attendre la fin
+  runDailyScanWithProgress(() => {}).then((result) => {
+    console.log(`[Scan] Termine: ${result.imported} importes, ${result.matched} matchs`);
+  }).catch((err) => {
+    console.error("[Scan] Erreur:", err);
+  });
 });
 
 export default router;

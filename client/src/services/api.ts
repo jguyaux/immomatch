@@ -44,47 +44,6 @@ export const api = {
     request(`/api/matches/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   importProperty: (url: string) =>
     request("/api/properties/import", { method: "POST", body: JSON.stringify({ url }) }),
-  scanProperties: async (
-    onProgress: (data: { type: string; source?: string; message?: string; step?: number; total?: number; imported?: number; matched?: number }) => void
-  ): Promise<{ imported: number; matched: number }> => {
-    const headers = await getAuthHeaders();
-    return new Promise((resolve, reject) => {
-      const url = `${API_URL}/api/properties/scan`;
-      const eventSource = new EventSource(url);
-
-      // EventSource doesn't support custom headers, so we use fetch with streaming
-      fetch(url, { headers }).then(async (res) => {
-        const reader = res.body?.getReader();
-        if (!reader) { reject(new Error("No reader")); return; }
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-
-          const lines = buffer.split("\n\n");
-          buffer = lines.pop() || "";
-
-          for (const line of lines) {
-            const match = line.match(/^data:\s*(.+)$/m);
-            if (!match) continue;
-            try {
-              const data = JSON.parse(match[1]);
-              if (data.type === "done") {
-                resolve({ imported: data.imported, matched: data.matched });
-                return;
-              } else if (data.type === "error") {
-                reject(new Error(data.message));
-                return;
-              }
-              onProgress(data);
-            } catch {}
-          }
-        }
-        resolve({ imported: 0, matched: 0 });
-      }).catch(reject);
-    });
-  },
+  scanProperties: () =>
+    request("/api/properties/scan", { method: "POST" }),
 };

@@ -74,20 +74,11 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     setScanResult(null);
     setScanProgress(null);
     try {
-      const data = await api.scanProperties((progress) => {
-        setScanProgress({
-          step: progress.step || 0,
-          total: progress.total || 4,
-          source: progress.source || "",
-          message: progress.message || "",
-        });
-      });
-      setScanResult(`${data.imported} biens scannes, ${data.matched} correspondent a vos criteres`);
-      setScanProgress(null);
-      loadDiscoveries();
+      await api.scanProperties();
+      setScanResult("Scan lance ! Les resultats apparaitront dans les Decouvertes dans 2-5 minutes. Revenez ici pour les voir.");
+      setTimeout(() => loadDiscoveries(), 10000);
     } catch (err) {
-      setScanResult(err instanceof Error ? err.message : "Erreur lors du scan");
-      setScanProgress(null);
+      setScanResult(err instanceof Error ? err.message : "Erreur lors du lancement du scan");
     } finally {
       setScanning(false);
     }
@@ -160,29 +151,9 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
             {scanning ? "Scan en cours..." : "Lancer le scan"}
           </button>
         </div>
-        {scanning && scanProgress && (
-          <div className="mt-4 bg-blue-50 rounded-lg p-4">
-            <div className="flex justify-between text-sm text-blue-700 mb-2">
-              <span className="font-medium">{scanProgress.message}</span>
-              <span>{scanProgress.step}/{scanProgress.total}</span>
-            </div>
-            <div className="w-full bg-blue-200 rounded-full h-2.5">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${(scanProgress.step / scanProgress.total) * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-xs text-blue-400 mt-2">
-              <span>Immoweb</span>
-              <span>Biddit</span>
-              <span>Trevi</span>
-              <span>Scoring</span>
-            </div>
-          </div>
-        )}
-        {scanning && !scanProgress && (
+        {scanning && (
           <div className="mt-4 bg-blue-50 text-blue-700 p-3 rounded-lg text-sm">
-            Demarrage du scan...
+            Lancement du scan en cours...
           </div>
         )}
         {scanResult && !scanning && (
