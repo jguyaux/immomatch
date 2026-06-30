@@ -43,16 +43,16 @@ export function DashboardPage() {
     <div>
       <ImportProperty onImported={loadMatches} />
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold">
           Mes matchs
           {matches.length > 0 && (
-            <span className="text-base font-normal text-gray-500 ml-2">
-              ({matches.length} biens)
+            <span className="text-sm font-normal text-gray-500 ml-2">
+              ({matches.length})
             </span>
           )}
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex border rounded-lg overflow-hidden">
             <button
               onClick={() => setView("list")}
