@@ -1,9 +1,16 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { LoginForm } from "../components/auth/LoginForm";
 import { RegisterForm } from "../components/auth/RegisterForm";
+import { useAuth } from "../context/AuthContext";
 
 export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const { user, loading } = useAuth();
+
+  if (!loading && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
