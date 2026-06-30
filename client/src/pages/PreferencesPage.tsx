@@ -2,6 +2,40 @@ import { useState, useEffect } from "react";
 import { PreferencesForm } from "../components/questionnaire/PreferencesForm";
 import { api } from "../services/api";
 
+interface SupabasePreferences {
+  transaction_type: string | null;
+  budget_min: number;
+  budget_max: number;
+  zones: string[];
+  property_types: string[];
+  bedrooms_min: number;
+  bedrooms_max: number | null;
+  surface_min: number | null;
+  surface_max: number | null;
+  peb_scores: string[];
+  features: string[];
+  deal_breakers: string[];
+  notes: string | null;
+}
+
+function mapFromSupabase(data: SupabasePreferences) {
+  return {
+    transactionType: data.transaction_type || "achat",
+    budgetMin: data.budget_min,
+    budgetMax: data.budget_max,
+    zones: data.zones,
+    propertyTypes: data.property_types,
+    bedroomsMin: data.bedrooms_min,
+    bedroomsMax: data.bedrooms_max,
+    surfaceMin: data.surface_min,
+    surfaceMax: data.surface_max,
+    pebScores: data.peb_scores,
+    features: data.features,
+    dealBreakers: data.deal_breakers,
+    notes: data.notes,
+  };
+}
+
 export function PreferencesPage() {
   const [initialData, setInitialData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -11,9 +45,9 @@ export function PreferencesPage() {
     api
       .getPreferences()
       .then((data: unknown) => {
-        const result = data as { preferences: Record<string, unknown> | null };
+        const result = data as { preferences: SupabasePreferences | null };
         if (result.preferences) {
-          setInitialData(result.preferences);
+          setInitialData(mapFromSupabase(result.preferences) as unknown as Record<string, unknown>);
         }
       })
       .catch(console.error)

@@ -23,6 +23,7 @@ export async function upsertPreferences(req: AuthenticatedRequest, res: Response
     .upsert(
       {
         user_id: req.userId,
+        transaction_type: req.body.transactionType,
         budget_min: req.body.budgetMin,
         budget_max: req.body.budgetMax,
         zones: req.body.zones,

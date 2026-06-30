@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { PropertyCard } from "../components/properties/PropertyCard";
+import { PropertyMap } from "../components/properties/PropertyMap";
+import { ImportProperty } from "../components/properties/ImportProperty";
 import { api } from "../services/api";
-import type { PropertyMatch } from "../../../../shared/types";
+import type { PropertyMatch } from "../../../shared/types";
 
 export function DashboardPage() {
   const [matches, setMatches] = useState<PropertyMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("score");
+  const [view, setView] = useState<"list" | "map">("list");
 
   useEffect(() => {
     loadMatches();
@@ -38,16 +41,45 @@ export function DashboardPage() {
 
   return (
     <div>
+      <ImportProperty onImported={loadMatches} />
+
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Vos matchs</h2>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 py-2 border rounded-lg text-sm"
-        >
-          <option value="score">Score</option>
-          <option value="price">Plus recents</option>
-        </select>
+        <h2 className="text-2xl font-bold">
+          Mes matchs
+          {matches.length > 0 && (
+            <span className="text-base font-normal text-gray-500 ml-2">
+              ({matches.length} biens)
+            </span>
+          )}
+        </h2>
+        <div className="flex items-center gap-3">
+          <div className="flex border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setView("list")}
+              className={`px-3 py-1.5 text-sm font-medium transition ${
+                view === "list" ? "bg-primary-600 text-white" : "bg-white text-gray-600"
+              }`}
+            >
+              Liste
+            </button>
+            <button
+              onClick={() => setView("map")}
+              className={`px-3 py-1.5 text-sm font-medium transition ${
+                view === "map" ? "bg-primary-600 text-white" : "bg-white text-gray-600"
+              }`}
+            >
+              Carte
+            </button>
+          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-2 border rounded-lg text-sm"
+          >
+            <option value="score">Score</option>
+            <option value="recent">Plus recents</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -56,9 +88,11 @@ export function DashboardPage() {
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Aucun match pour le moment</p>
           <p className="text-gray-400 mt-2">
-            Les biens seront analyses quotidiennement selon vos criteres.
+            Collez un lien Immoweb ci-dessus ou validez des biens depuis l'onglet Decouvertes.
           </p>
         </div>
+      ) : view === "map" ? (
+        <PropertyMap matches={matches} />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {matches.map((match) => (

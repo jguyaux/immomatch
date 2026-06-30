@@ -1,6 +1,9 @@
+export type TransactionType = "achat" | "location";
+
 export interface UserPreferences {
   id: string;
   userId: string;
+  transactionType: TransactionType;
   budgetMin: number;
   budgetMax: number;
   zones: string[];
@@ -24,7 +27,7 @@ export type PebScore = "A" | "B" | "C" | "D" | "E" | "F" | "G";
 export interface Property {
   id: string;
   externalId: string;
-  source: "immoweb";
+  source: string;
   url: string;
   title: string;
   description: string | null;
@@ -39,6 +42,8 @@ export interface Property {
   zipCode: string | null;
   city: string | null;
   province: string | null;
+  latitude: number | null;
+  longitude: number | null;
   imageUrls: string[];
   features: string[];
   rawData: Record<string, unknown> | null;
@@ -57,6 +62,7 @@ export interface PropertyMatch {
   isFavorite: boolean;
   isViewed: boolean;
   isDismissed: boolean;
+  isValidated: boolean;
   createdAt: string;
   property?: Property;
 }

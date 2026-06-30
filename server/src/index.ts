@@ -4,11 +4,13 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import preferencesRouter from "./routes/preferences.js";
 import matchesRouter from "./routes/matches.js";
+import propertiesRouter from "./routes/properties.js";
 import { startDailyScanJob } from "./jobs/dailyScan.js";
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173" }));
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:5173").split(",");
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.get("/api/health", (_req, res) => {
@@ -17,6 +19,7 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/preferences", preferencesRouter);
 app.use("/api/matches", matchesRouter);
+app.use("/api/properties", propertiesRouter);
 
 app.use(errorHandler);
 
