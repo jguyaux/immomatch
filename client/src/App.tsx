@@ -87,78 +87,34 @@ function ProtectedLayout() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav className="flex gap-2 mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`
-            }
-          >
-            Matchs
-          </NavLink>
-          <NavLink
-            to="/discoveries"
-            className={({ isActive }) =>
-              `relative px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`
-            }
-          >
-            Decouvertes
-            {discoveriesCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 flex items-center justify-center px-1 text-xs font-bold bg-red-500 text-white rounded-full shadow-sm">
-                {discoveriesCount > 99 ? "99+" : discoveriesCount}
-              </span>
-            )}
-          </NavLink>
-          <NavLink
-            to="/compare"
-            className={({ isActive }) =>
-              `relative px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`
-            }
-          >
-            Comparateur
-            {compareList.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 flex items-center justify-center px-1 text-xs font-bold bg-primary-500 text-white rounded-full shadow-sm">
-                {compareList.length}
-              </span>
-            )}
-          </NavLink>
-          <NavLink
-            to="/preferences"
-            className={({ isActive }) =>
-              `px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`
-            }
-          >
-            Criteres
-          </NavLink>
-          <NavLink
-            to="/credit"
-            className={({ isActive }) =>
-              `px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-primary-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`
-            }
-          >
-            Credit
-          </NavLink>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <nav className="flex gap-1 mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-1 overflow-x-auto scrollbar-hide">
+          {[
+            { to: "/dashboard", label: "Matchs", badge: null },
+            { to: "/discoveries", label: "Decouvertes", badge: discoveriesCount > 0 ? discoveriesCount : null },
+            { to: "/compare", label: "Comparer", badge: compareList.length > 0 ? compareList.length : null },
+            { to: "/preferences", label: "Criteres", badge: null },
+            { to: "/credit", label: "Credit", badge: null },
+          ].map(({ to, label, badge }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `relative flex-shrink-0 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-primary-600 text-white shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`
+              }
+            >
+              {label}
+              {badge !== null && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center px-1 text-[10px] font-bold bg-red-500 text-white rounded-full">
+                  {Number(badge) > 99 ? "99+" : badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
         </nav>
         <Routes>
           <Route path="/dashboard" element={<DashboardPage />} />
