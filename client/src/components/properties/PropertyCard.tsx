@@ -2,6 +2,7 @@ import type { PropertyMatch } from "../../../../shared/types";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { useCompare } from "../../App";
 import { NeighborhoodCard } from "./NeighborhoodCard";
+import { FinancialAnalysisCard } from "./FinancialAnalysisCard";
 
 interface PropertyCardProps {
   match: PropertyMatch;
@@ -129,6 +130,8 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
         )}
 
         <NeighborhoodCard propertyId={match.id} hasCoords={!!(property.latitude && property.longitude)} />
+
+        <FinancialAnalysisCard match={match} />
 
         <div className="flex flex-wrap gap-2 pt-3 border-t">
           <button

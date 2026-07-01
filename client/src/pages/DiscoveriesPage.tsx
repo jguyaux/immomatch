@@ -3,6 +3,7 @@ import { api } from "../services/api";
 import type { PropertyMatch, PropertyType } from "../../../shared/types";
 import { PhotoCarousel } from "../components/properties/PhotoCarousel";
 import { NeighborhoodCard } from "../components/properties/NeighborhoodCard";
+import { FinancialAnalysisCard } from "../components/properties/FinancialAnalysisCard";
 
 interface DiscoveriesPageProps {
   onCountChange?: (count: number) => void;
@@ -348,6 +349,8 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{match.reasoning}</p>
 
                       <NeighborhoodCard propertyId={match.id} hasCoords={!!(property.latitude && property.longitude)} />
+
+                      <FinancialAnalysisCard match={match} />
 
                       {/* Boutons */}
                       <div className="flex flex-wrap gap-2 mt-3">
