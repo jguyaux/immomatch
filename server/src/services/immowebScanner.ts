@@ -18,11 +18,33 @@ const TYPE_MAP: Record<string, string> = {
   villa: "villa",
 };
 
-// Postal code ranges [min, max] for Belgian cities/zones
+// Regions belges — slug Immoweb + plages ZIP
+const BELGIAN_REGIONS: Record<string, { slug: string; zips: [number, number][] }> = {
+  "bruxelles capitale":    { slug: "bruxelles-capitale",    zips: [[1000, 1299]] },
+  "brabant wallon":        { slug: "brabant-wallon",        zips: [[1300, 1499]] },
+  "province de namur":     { slug: "province-de-namur",     zips: [[5000, 5999]] },
+  "province de liege":     { slug: "province-de-liege",     zips: [[4000, 4999]] },
+  "province du hainaut":   { slug: "province-du-hainaut",   zips: [[6000, 7999]] },
+  "province du luxembourg":{ slug: "province-du-luxembourg",zips: [[6600, 6999]] },
+  "brabant flamand":       { slug: "brabant-flamand",       zips: [[1500, 3499]] },
+  "flandre orientale":     { slug: "flandre-orientale",     zips: [[9000, 9999]] },
+  "flandre occidentale":   { slug: "flandre-occidentale",   zips: [[8000, 8999]] },
+  "province d anvers":     { slug: "province-d-anvers",     zips: [[2000, 2999]] },
+  "province de limbourg":  { slug: "province-de-limbourg",  zips: [[3500, 3999]] },
+};
+
+function getRegion(zone: string): { slug: string; zips: [number, number][] } | null {
+  const key = normalize(zone);
+  for (const [k, v] of Object.entries(BELGIAN_REGIONS)) {
+    if (key === normalize(k)) return v;
+  }
+  return null;
+}
+
+// Postal code ranges [min, max] for Belgian cities/communes
 const ZONE_ZIP_RANGES: Record<string, [number, number][]> = {
   namur: [[5000, 5024], [5100, 5110]],
-  bruxelles: [[1000, 1299]],
-  "bruxelles capitale": [[1000, 1299]],
+  bruxelles: [[1000, 1099]],
   "mont saint guibert": [[1435, 1435]],
   mons: [[7000, 7099]],
   liege: [[4000, 4199]],
@@ -46,6 +68,8 @@ function normalize(str: string): string {
 }
 
 function getZipRanges(zone: string): [number, number][] {
+  const region = getRegion(zone);
+  if (region) return region.zips;
   const key = normalize(zone);
   for (const [k, v] of Object.entries(ZONE_ZIP_RANGES)) {
     if (key === k || key.includes(k) || k.includes(key)) return v;
@@ -141,7 +165,7 @@ function isExcludedType(prop: Property): boolean {
 }
 
 const ZONE_POSTAL_CODES: Record<string, string> = {
-  namur: "5000", bruxelles: "1000", "bruxelles capitale": "1000",
+  namur: "5000", bruxelles: "1000",
   "mont saint guibert": "1435", mons: "7000", liege: "4000",
   charleroi: "6000", wavre: "1300", louvain: "3000", leuven: "3000",
   gent: "9000", antwerpen: "2000", ottignies: "1340",
@@ -150,23 +174,25 @@ const ZONE_POSTAL_CODES: Record<string, string> = {
 };
 
 function getPostalCode(zone: string): string {
-  const key = zone.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/-/g, " ").trim();
+  const key = normalize(zone);
   for (const [k, v] of Object.entries(ZONE_POSTAL_CODES)) {
-    if (key === k || key.includes(k) || k.includes(key)) return v;
+    if (key === normalize(k)) return v;
   }
   return "";
 }
 
 async function fetchSearchResults(type: string, transaction: string, zone: string): Promise<string[]> {
-  const zoneLower = zone.toLowerCase().replace(/\s+/g, "-");
-  const postalCode = getPostalCode(zone);
+  // Pour les régions, on utilise le slug Immoweb directement (sans code postal)
+  const region = getRegion(zone);
+  const slug = region ? region.slug : zone.toLowerCase().replace(/\s+/g, "-");
+  const postalCode = region ? "" : getPostalCode(zone);
   const seen = new Set<string>();
   const allUrls: string[] = [];
 
   for (let page = 1; page <= MAX_PAGES; page++) {
     try {
       const zipPart = postalCode ? `/${postalCode}` : "";
-      const searchUrl = `https://www.immoweb.be/fr/recherche/${type}/${transaction}/${zoneLower}${zipPart}?page=${page}&orderBy=newest`;
+      const searchUrl = `https://www.immoweb.be/fr/recherche/${type}/${transaction}/${slug}${zipPart}?page=${page}&orderBy=newest`;
       const res = await fetch(searchUrl, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -185,12 +211,12 @@ async function fetchSearchResults(type: string, transaction: string, zone: strin
       for (const u of urls) seen.add(u);
 
       if (newOnPage.length === 0) {
-        console.log(`[Immoweb] ${type}/${zone} page ${page}: plus de nouvelles annonces, arret`);
+        console.log(`[Immoweb] ${type}/${slug} page ${page}: plus de nouvelles annonces, arret`);
         break;
       }
 
       allUrls.push(...newOnPage);
-      console.log(`[Immoweb] ${type}/${zone} page ${page}: ${newOnPage.length} nouvelles`);
+      console.log(`[Immoweb] ${type}/${slug} page ${page}: ${newOnPage.length} nouvelles`);
 
       await new Promise((r) => setTimeout(r, 1000));
     } catch {

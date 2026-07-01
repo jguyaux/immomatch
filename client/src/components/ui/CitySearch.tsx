@@ -1,5 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 
+const BELGIAN_REGIONS = [
+  "Bruxelles-Capitale",
+  "Brabant Wallon",
+  "Province de Namur",
+  "Province de Liège",
+  "Province du Hainaut",
+  "Province du Luxembourg",
+  "Brabant Flamand",
+  "Flandre Orientale",
+  "Flandre Occidentale",
+  "Province d'Anvers",
+  "Province de Limbourg",
+];
+
 const BELGIAN_CITIES = [
   "Aalst", "Aalter", "Aarschot", "Aartselaar", "Andenne", "Anderlecht", "Ans", "Antwerpen",
   "Arlon", "Asse", "Ath", "Aubange", "Auderghem",
@@ -50,13 +64,21 @@ export function CitySearch({ selected, onChange }: CitySearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const suggestions = query.length >= 2
-    ? BELGIAN_CITIES.filter(
-        (city) =>
-          city.toLowerCase().includes(query.toLowerCase()) &&
-          !selected.includes(city)
-      ).slice(0, 8)
+  const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  const matchingRegions = query.length >= 2
+    ? BELGIAN_REGIONS.filter(
+        (r) => normalize(r).includes(normalize(query)) && !selected.includes(r)
+      )
     : [];
+
+  const matchingCities = query.length >= 2
+    ? BELGIAN_CITIES.filter(
+        (city) => normalize(city).includes(normalize(query)) && !selected.includes(city)
+      ).slice(0, 6)
+    : [];
+
+  const suggestions = [...matchingRegions, ...matchingCities].slice(0, 10);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -93,21 +115,29 @@ export function CitySearch({ selected, onChange }: CitySearchProps) {
     <div ref={containerRef} className="relative">
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
-          {selected.map((city) => (
-            <span
-              key={city}
-              className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
-            >
-              {city}
-              <button
-                type="button"
-                onClick={() => removeCity(city)}
-                className="text-primary-500 hover:text-primary-800 font-bold"
+          {selected.map((city) => {
+            const isRegion = BELGIAN_REGIONS.includes(city);
+            return (
+              <span
+                key={city}
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                  isRegion
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-primary-100 text-primary-700"
+                }`}
               >
-                x
-              </button>
-            </span>
-          ))}
+                {isRegion && <span className="text-xs">📍</span>}
+                {city}
+                <button
+                  type="button"
+                  onClick={() => removeCity(city)}
+                  className={`font-bold ${isRegion ? "text-blue-500 hover:text-blue-900" : "text-primary-500 hover:text-primary-800"}`}
+                >
+                  x
+                </button>
+              </span>
+            );
+          })}
         </div>
       )}
 
@@ -130,23 +160,31 @@ export function CitySearch({ selected, onChange }: CitySearchProps) {
             }
           }
         }}
-        placeholder="Tapez une ville ou commune (ex: Namur, Wavre, Ixelles...)"
+        placeholder="Ville, commune ou région (ex: Brabant Wallon, Wavre...)"
         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
       />
 
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-          {suggestions.map((city) => (
-            <li key={city}>
-              <button
-                type="button"
-                onClick={() => addCity(city)}
-                className="w-full text-left px-4 py-2 hover:bg-primary-50 text-sm"
-              >
-                {city}
-              </button>
-            </li>
-          ))}
+        <ul className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-56 overflow-y-auto">
+          {suggestions.map((item) => {
+            const isRegion = BELGIAN_REGIONS.includes(item);
+            return (
+              <li key={item}>
+                <button
+                  type="button"
+                  onClick={() => addCity(item)}
+                  className="w-full text-left px-4 py-2 hover:bg-primary-50 text-sm flex items-center justify-between gap-2"
+                >
+                  <span>{item}</span>
+                  {isRegion && (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-full shrink-0">
+                      Région
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
