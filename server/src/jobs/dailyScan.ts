@@ -3,7 +3,7 @@ import { supabase } from "../config/supabase.js";
 import { scanBiddit, saveProperties as saveBidditProperties } from "../services/bidditService.js";
 import { scanTrevi, saveProperties as saveTreviProperties } from "../services/treviService.js";
 import { scanImmoweb, saveProperties as saveImmowebProperties } from "../services/immowebScanner.js";
-import { processMatchesForAllUsers } from "../services/matchingService.js";
+import { processMatchesForAllUsers, processMatchesForUser } from "../services/matchingService.js";
 
 type ProgressFn = (data: Record<string, unknown>) => void;
 const noop: ProgressFn = () => {};
@@ -87,7 +87,9 @@ async function _runScan(send: ProgressFn, userId?: string) {
 
   // 4. Matching
   send({ type: "progress", source: "Matching", message: "Analyse et scoring des biens...", step: 4, total: 4 });
-  const matched = await processMatchesForAllUsers();
+  const matched = userId
+    ? await processMatchesForUser(userId)
+    : await processMatchesForAllUsers();
 
   console.log(`[CRON] Scan terminé: ${totalImported} biens importés, ${matched} matchs créés`);
   return { imported: totalImported, matched };
