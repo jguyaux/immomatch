@@ -47,10 +47,11 @@ export async function upsertPreferences(req: AuthenticatedRequest, res: Response
     return;
   }
 
-  // Purger les découvertes en attente — elles ont été générées avec les anciens critères
+  // Supprimer (pas dismisser) les matches en attente — ils seront réévalués au prochain scan
+  // avec les nouveaux critères. Les dismisses manuels (is_dismissed=true) restent exclus.
   await supabase
     .from("property_matches")
-    .update({ is_dismissed: true })
+    .delete()
     .eq("user_id", req.userId)
     .eq("is_validated", false)
     .eq("is_dismissed", false);

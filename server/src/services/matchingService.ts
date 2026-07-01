@@ -87,10 +87,14 @@ async function getUserPreferences(userId: string): Promise<UserPreferences | nul
 }
 
 async function getUnscoredProperties(userId: string, prefs: UserPreferences): Promise<Property[]> {
+  // Exclure les propriétés déjà validées ou dismissées manuellement par l'utilisateur.
+  // Les matches en attente (pending) ont été supprimés avant cet appel — leurs propriétés
+  // seront donc réévaluées avec les critères actuels.
   const { data: scored } = await supabase
     .from("property_matches")
     .select("property_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .or("is_validated.eq.true,is_dismissed.eq.true");
 
   const scoredIds = (scored || []).map((s) => s.property_id);
 
