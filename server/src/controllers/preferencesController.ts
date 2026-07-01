@@ -47,5 +47,13 @@ export async function upsertPreferences(req: AuthenticatedRequest, res: Response
     return;
   }
 
+  // Purger les découvertes en attente — elles ont été générées avec les anciens critères
+  await supabase
+    .from("property_matches")
+    .update({ is_dismissed: true })
+    .eq("user_id", req.userId)
+    .eq("is_validated", false)
+    .eq("is_dismissed", false);
+
   res.json({ preferences: data });
 }

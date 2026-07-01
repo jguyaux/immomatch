@@ -68,8 +68,11 @@ export function PreferencesPage() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Mes critères de recherche</h2>
       {saved && (
-        <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-6 text-center">
-          Critères sauvegardés avec succès !
+        <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-6">
+          <p className="font-medium">Critères sauvegardés !</p>
+          <p className="text-sm mt-0.5 text-green-600">
+            Les découvertes précédentes ont été effacées. Lance un nouveau scan pour obtenir des résultats correspondant à tes nouveaux critères.
+          </p>
         </div>
       )}
       <PreferencesForm initialData={initialData ?? undefined} onSubmit={handleSubmit} />
