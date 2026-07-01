@@ -210,8 +210,13 @@ const ZONE_POSTAL_CODES: Record<string, string> = {
 
 function getPostalCode(zone: string): string {
   const key = normalize(zone);
+  // Exact match first, then partial (handles "Ottignies-Louvain-la-Neuve" → "ottignies")
   for (const [k, v] of Object.entries(ZONE_POSTAL_CODES)) {
     if (key === normalize(k)) return v;
+  }
+  for (const [k, v] of Object.entries(ZONE_POSTAL_CODES)) {
+    const kn = normalize(k);
+    if (key.includes(kn) || kn.includes(key)) return v;
   }
   return "";
 }
@@ -219,7 +224,7 @@ function getPostalCode(zone: string): string {
 async function fetchSearchResults(type: string, transaction: string, zone: string): Promise<string[]> {
   // Pour les régions, on utilise le slug Immoweb directement (sans code postal)
   const region = getRegion(zone);
-  const slug = region ? region.slug : zone.toLowerCase().replace(/\s+/g, "-");
+  const slug = region ? region.slug : normalize(zone).replace(/\s+/g, "-");
   const postalCode = region ? "" : getPostalCode(zone);
   const seen = new Set<string>();
   const allUrls: string[] = [];

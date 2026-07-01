@@ -169,15 +169,16 @@ async function getUnscoredProperties(userId: string, prefs: UserPreferences): Pr
   if (prefs.zones.length > 0) {
     const normalizedZones = prefs.zones.map((z) => normalize(z));
     filtered = filtered.filter((p) => {
-      const searchFields = [p.city, p.address, p.zipCode, p.url]
-        .filter(Boolean)
-        .map((s) => normalize(s!));
-      const textMatch = normalizedZones.some((zone) =>
-        searchFields.some((f) => f === zone || f.includes(zone) || zone.includes(f))
-      );
+      // Matcher uniquement sur city et zipCode — pas sur address/url qui peuvent
+      // contenir le nom d'une commune sans que le bien y soit situé (ex: "Route de Namur").
+      const cityNorm = p.city ? normalize(p.city) : null;
+      const textMatch = cityNorm
+        ? normalizedZones.some((zone) =>
+            cityNorm === zone || cityNorm.includes(zone) || zone.includes(cityNorm)
+          )
+        : false;
       if (textMatch) return true;
 
-      // Verifier aussi par plage de codes postaux (ex: Jambes 5100 appartient a Namur)
       if (p.zipCode) {
         const zip = parseInt(p.zipCode, 10);
         if (!isNaN(zip)) {
@@ -294,9 +295,12 @@ const ZONE_ZIP_RANGES: Record<string, [number, number][]> = {
   "wavre":                   [[1300, 1329]],
   "waterloo":                [[1410, 1410]],
   // Province de Namur
-  namur:                     [[5000, 5024], [5100, 5110]],
+  namur:                     [[5000, 5024]],
+  jambes:                    [[5100, 5100]],
+  wepion:                    [[5100, 5100]],
   andenne:                   [[5300, 5330]],
   gembloux:                  [[5030, 5032]],
+  profondeville:             [[5170, 5170]],
   dinant:                    [[5500, 5540]],
   // Reste
   mons:               [[7000, 7099]],
