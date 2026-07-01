@@ -165,12 +165,34 @@ function isExcludedType(prop: Property): boolean {
 }
 
 const ZONE_POSTAL_CODES: Record<string, string> = {
-  namur: "5000", bruxelles: "1000",
-  "mont saint guibert": "1435", mons: "7000", liege: "4000",
-  charleroi: "6000", wavre: "1300", louvain: "3000", leuven: "3000",
-  gent: "9000", antwerpen: "2000", ottignies: "1340",
-  "louvain la neuve": "1348", nivelles: "1400", waterloo: "1410",
-  arlon: "6700", tournai: "7500", verviers: "4800",
+  // Communes bruxelloises
+  "anderlecht": "1070", "auderghem": "1160", "berchem sainte agathe": "1082",
+  "bruxelles": "1000", "etterbeek": "1040", "evere": "1140",
+  "forest": "1190", "ganshoren": "1083", "ixelles": "1050",
+  "jette": "1090", "koekelberg": "1081", "molenbeek saint jean": "1080",
+  "saint gilles": "1060", "saint josse ten noode": "1210",
+  "schaerbeek": "1030", "uccle": "1180",
+  "watermael boitsfort": "1170",
+  "woluwe saint lambert": "1200", "woluwe saint pierre": "1150",
+  // Brabant Wallon
+  "braine l alleud": "1420", "braine le chateau": "1440",
+  "court saint etienne": "1490", "genappe": "1470",
+  "grez doiceau": "1390", "lasne": "1380", "nivelles": "1400",
+  "ottignies": "1340", "louvain la neuve": "1348",
+  "perwez": "1360", "rebecq": "1430", "rixensart": "1330",
+  "tubize": "1480", "wavre": "1300", "waterloo": "1410",
+  "villers la ville": "1495",
+  // Province de Namur
+  "namur": "5000", "andenne": "5300", "ciney": "5590",
+  "dinant": "5500", "gembloux": "5030", "profondeville": "5170",
+  "rochefort": "5580", "sambreville": "5060",
+  // Reste de la Belgique
+  "mons": "7000", "liege": "4000", "charleroi": "6000",
+  "louvain": "3000", "leuven": "3000", "gent": "9000", "antwerpen": "2000",
+  "arlon": "6700", "tournai": "7500", "verviers": "4800",
+  "hasselt": "3500", "bruges": "8000", "brugge": "8000",
+  "mechelen": "2800", "aalst": "9300", "kortrijk": "8500",
+  "mont saint guibert": "1435",
 };
 
 function getPostalCode(zone: string): string {
