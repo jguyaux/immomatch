@@ -90,8 +90,8 @@ export async function getDiscoveries(req: AuthenticatedRequest, res: Response) {
     .from("property_matches")
     .select("*, properties(*)", { count: "exact" })
     .eq("user_id", req.userId)
-    .eq("is_validated", false)
-    .eq("is_dismissed", false)
+    .or("is_validated.eq.false,is_validated.is.null")
+    .or("is_dismissed.eq.false,is_dismissed.is.null")
     .gte("score", 50)
     .order("score", { ascending: false })
     .range(offset, offset + limit - 1);
@@ -154,8 +154,8 @@ export async function getDiscoveriesCount(req: AuthenticatedRequest, res: Respon
     .from("property_matches")
     .select("id", { count: "exact", head: true })
     .eq("user_id", req.userId)
-    .eq("is_validated", false)
-    .eq("is_dismissed", false)
+    .or("is_validated.eq.false,is_validated.is.null")
+    .or("is_dismissed.eq.false,is_dismissed.is.null")
     .gte("score", 50);
 
   if (error) {

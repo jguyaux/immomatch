@@ -32,6 +32,8 @@ export async function processMatchesForUser(userId: string): Promise<number> {
       reasoning: result.reasoning,
       strengths: result.strengths,
       weaknesses: result.weaknesses,
+      is_validated: false,
+      is_dismissed: false,
     });
 
     if (!error) matchCount++;
