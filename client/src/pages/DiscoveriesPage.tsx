@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import type { PropertyMatch, PropertyType } from "../../../shared/types";
+import { PhotoCarousel } from "../components/properties/PhotoCarousel";
 
 interface DiscoveriesPageProps {
   onCountChange?: (count: number) => void;
@@ -284,28 +285,17 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
               return (
                 <div key={match.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
                   <div className="flex flex-col sm:flex-row">
-                    {/* Image */}
+                    {/* Image avec carousel */}
                     <div className="relative flex-shrink-0">
-                      {property.imageUrls[0] ? (
-                        <img
-                          src={property.imageUrls[0]}
-                          alt={property.title}
-                          className="w-full h-48 sm:w-44 sm:h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-40 sm:w-44 sm:h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
-                          Pas d'image
-                        </div>
-                      )}
-                      {/* Source badge */}
-                      <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-xs font-semibold shadow-sm ${sourceInfo.color}`}>
+                      <PhotoCarousel
+                        images={property.imageUrls}
+                        alt={property.title}
+                        className="w-full h-48 sm:w-44 sm:h-44"
+                      />
+                      {/* Source badge — au-dessus du carousel */}
+                      <span className={`absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md text-xs font-semibold shadow-sm pointer-events-none ${sourceInfo.color}`}>
                         {sourceInfo.label}
                       </span>
-                      {/* Score circle — overlay sur l'image en mobile */}
-                      <div className={`absolute top-2 right-2 sm:hidden w-11 h-11 rounded-full bg-gradient-to-br ${scoreColor} flex flex-col items-center justify-center shadow-md`}>
-                        <span className="text-sm font-bold leading-none">{match.score}</span>
-                        <span className="text-[8px] opacity-80 leading-none">/100</span>
-                      </div>
                     </div>
 
                     {/* Content */}
@@ -329,9 +319,9 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                               </div>
                             )}
                           </div>
-                          {/* Score circle — visible seulement en desktop */}
-                          <div className={`hidden sm:flex w-12 h-12 rounded-full bg-gradient-to-br ${scoreColor} flex-col items-center justify-center shadow-md flex-shrink-0`}>
-                            <span className="text-base font-bold leading-none">{match.score}</span>
+                          {/* Score circle */}
+                          <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br ${scoreColor} flex flex-col items-center justify-center shadow-md flex-shrink-0`}>
+                            <span className="text-sm font-bold leading-none">{match.score}</span>
                             <span className="text-[8px] opacity-80 leading-none">/100</span>
                           </div>
                         </div>
