@@ -71,8 +71,14 @@ function normalize(str: string): string {
   return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/-/g, " ").trim();
 }
 
+function fetchWithTimeout(url: string, options: RequestInit = {}, ms = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 async function fetchPropertyUrls(): Promise<string[]> {
-  const res = await fetch(SITEMAP_URL);
+  const res = await fetchWithTimeout(SITEMAP_URL, {}, 15000);
   const xml = await res.text();
   const urls = [...xml.matchAll(/<loc>([^<]+\/bien\/[^<]+)<\/loc>/g)].map((m) => m[1]);
   return urls;
@@ -85,9 +91,9 @@ function extractTreviId(url: string): string {
 
 async function fetchPropertyDetails(url: string): Promise<Property | null> {
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; ImmoMatch/1.0)" },
-    });
+    }, 10000);
     if (!res.ok) return null;
 
     const html = await res.text();

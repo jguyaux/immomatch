@@ -58,11 +58,17 @@ function normalize(str: string): string {
   return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/-/g, " ").trim();
 }
 
+function fetchWithTimeout(url: string, options: RequestInit = {}, ms = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 async function fetchLotIdsFromSitemap(): Promise<string[]> {
   const allIds: string[] = [];
   for (const url of SITEMAP_URLS) {
     try {
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url, {}, 15000);
       const xml = await res.text();
       const ids = [...xml.matchAll(/catalog\/detail\/(\d+)/g)].map((m) => m[1]);
       allIds.push(...ids);
@@ -75,7 +81,7 @@ async function fetchLotIdsFromSitemap(): Promise<string[]> {
 
 async function fetchLotDetails(reference: string): Promise<Property | null> {
   try {
-    const res = await fetch(`${LOT_API_URL}/${reference}`);
+    const res = await fetchWithTimeout(`${LOT_API_URL}/${reference}`, {}, 10000);
     if (!res.ok) return null;
 
     const data = await res.json();

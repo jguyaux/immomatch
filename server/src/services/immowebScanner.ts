@@ -3,7 +3,13 @@ import { parseImmowebUrl } from "./immowebParser.js";
 import type { Property } from "../../../shared/types.js";
 
 const BATCH_SIZE = 10;
-const MAX_PAGES = 25;
+const MAX_PAGES = 10;
+
+function fetchWithTimeout(url: string, options: RequestInit = {}, ms = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
 
 const TRANSACTION_MAP: Record<string, string> = {
   achat: "a-vendre",
@@ -215,12 +221,12 @@ async function fetchSearchResults(type: string, transaction: string, zone: strin
     try {
       const zipPart = postalCode ? `/${postalCode}` : "";
       const searchUrl = `https://www.immoweb.be/fr/recherche/${type}/${transaction}/${slug}${zipPart}?page=${page}&orderBy=newest`;
-      const res = await fetch(searchUrl, {
+      const res = await fetchWithTimeout(searchUrl, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           "Accept-Language": "fr-BE,fr;q=0.9",
         },
-      });
+      }, 15000);
 
       if (!res.ok) break;
 

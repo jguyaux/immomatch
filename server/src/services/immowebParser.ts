@@ -6,13 +6,16 @@ export async function parseImmowebUrl(url: string): Promise<Property> {
     throw new Error("URL invalide : seuls les liens Immoweb sont acceptes");
   }
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
   const res = await fetch(url, {
+    signal: controller.signal,
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       "Accept-Language": "fr-BE,fr;q=0.9",
     },
-  });
+  }).finally(() => clearTimeout(timer));
 
   if (!res.ok) {
     throw new Error(`Impossible de charger la page Immoweb (status ${res.status})`);

@@ -13,8 +13,18 @@ export function startDailyScanJob() {
   console.log("[CRON] Scan quotidien programme (7h00)");
 }
 
+const SCAN_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes max
+
 export async function runDailyScanWithProgress(send: ProgressFn) {
   console.log("[CRON] Debut du scan quotidien");
+
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Scan timeout (5 min)")), SCAN_TIMEOUT_MS)
+  );
+  return Promise.race([_runScan(send), timeout]);
+}
+
+async function _runScan(send: ProgressFn) {
 
   const userPrefs = await getAllUserPrefs();
   const zones = [...new Set(userPrefs.flatMap((p) => p.zones))];
