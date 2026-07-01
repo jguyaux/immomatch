@@ -91,10 +91,10 @@ function ProtectedLayout() {
         <nav className="flex gap-1 mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-1 overflow-x-auto scrollbar-hide">
           {[
             { to: "/dashboard", label: "Matchs", badge: null },
-            { to: "/discoveries", label: "Decouvertes", badge: discoveriesCount > 0 ? discoveriesCount : null },
+            { to: "/discoveries", label: "Découvertes", badge: discoveriesCount > 0 ? discoveriesCount : null },
             { to: "/compare", label: "Comparer", badge: compareList.length > 0 ? compareList.length : null },
-            { to: "/preferences", label: "Criteres", badge: null },
-            { to: "/credit", label: "Credit", badge: null },
+            { to: "/preferences", label: "Critères", badge: null },
+            { to: "/credit", label: "Crédit", badge: null },
           ].map(({ to, label, badge }) => (
             <NavLink
               key={to}

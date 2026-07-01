@@ -66,10 +66,10 @@ export function PreferencesPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Mes criteres de recherche</h2>
+      <h2 className="text-2xl font-bold mb-6">Mes critères de recherche</h2>
       {saved && (
         <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-6 text-center">
-          Criteres sauvegardes avec succes !
+          Critères sauvegardés avec succès !
         </div>
       )}
       <PreferencesForm initialData={initialData ?? undefined} onSubmit={handleSubmit} />

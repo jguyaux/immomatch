@@ -78,7 +78,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     setScanProgress(null);
     try {
       await api.scanProperties();
-      setScanResult("Scan lance ! Les resultats apparaitront dans les Decouvertes dans 2-5 minutes. Revenez ici pour les voir.");
+      setScanResult("Scan lancé ! Les résultats apparaîtront dans les Découvertes dans 2-5 minutes. Revenez ici pour les voir.");
       setTimeout(() => loadDiscoveries(), 10000);
     } catch (err) {
       setScanResult(err instanceof Error ? err.message : "Erreur lors du lancement du scan");
@@ -143,7 +143,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
           <div>
             <h3 className="text-lg font-semibold">Scanner des biens</h3>
             <p className="text-sm text-gray-500">
-              Scanne Immoweb, Biddit et Trevi pour trouver des biens correspondant a vos criteres
+              Scanne Immoweb, Biddit et Trevi pour trouver des biens correspondant à vos critères
             </p>
           </div>
           <button
@@ -166,9 +166,9 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         )}
       </div>
 
-      <h2 className="text-2xl font-bold mb-2">Decouvertes</h2>
+      <h2 className="text-2xl font-bold mb-2">Découvertes</h2>
       <p className="text-gray-500 mb-4">
-        Biens trouves automatiquement. Validez ceux qui vous interessent pour les ajouter a vos matchs.
+        Biens trouvés automatiquement. Validez ceux qui vous intéressent pour les ajouter à vos matchs.
       </p>
 
       {/* Quick filters */}
@@ -180,13 +180,13 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
               onClick={resetFilters}
               className="text-xs text-primary-600 hover:text-primary-800 font-medium transition"
             >
-              Reinitialiser
+              Réinitialiser
             </button>
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Prix min (EUR)</label>
+            <label className="block text-xs text-gray-500 mb-1">Prix min (€)</label>
             <input
               type="number"
               value={priceMin}
@@ -196,12 +196,12 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Prix max (EUR)</label>
+            <label className="block text-xs text-gray-500 mb-1">Prix max (€)</label>
             <input
               type="number"
               value={priceMax}
               onChange={(e) => setPriceMax(e.target.value)}
-              placeholder="Illimite"
+              placeholder="Illimité"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             />
           </div>
@@ -221,7 +221,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Surface min (m2)</label>
+            <label className="block text-xs text-gray-500 mb-1">Surface min (m²)</label>
             <input
               type="number"
               value={minSurface}
@@ -256,11 +256,11 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
       ) : filteredDiscoveries.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
-            {hasActiveFilters ? "Aucun resultat avec ces filtres" : "Aucune decouverte en attente"}
+            {hasActiveFilters ? "Aucun résultat avec ces filtres" : "Aucune découverte en attente"}
           </p>
           <p className="text-gray-400 mt-2">
             {hasActiveFilters
-              ? "Essayez d'elargir vos criteres de filtrage."
+              ? "Essayez d'élargir vos critères de filtrage."
               : "Lancez un scan pour trouver de nouveaux biens."}
           </p>
         </div>
@@ -268,7 +268,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         <>
           {hasActiveFilters && (
             <p className="text-sm text-gray-500 mb-3">
-              {filteredDiscoveries.length} resultat{filteredDiscoveries.length > 1 ? "s" : ""} sur {discoveries.length}
+              {filteredDiscoveries.length} résultat{filteredDiscoveries.length > 1 ? "s" : ""} sur {discoveries.length}
             </p>
           )}
           <div className="space-y-4">
@@ -371,7 +371,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                         <button
                           onClick={() => handleDismiss(match.id)}
                           className="px-3 py-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg text-xs sm:text-sm transition whitespace-nowrap"
-                          title="Pas interessé"
+                          title="Pas intéressé"
                         >
                           ✕ Ignorer
                         </button>

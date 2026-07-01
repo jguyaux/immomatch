@@ -77,11 +77,11 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
           <h3 className="font-semibold text-lg leading-tight line-clamp-2 flex-1">{property.title}</h3>
           <div className="text-right ml-3 flex-shrink-0">
             <span className="text-lg font-bold text-primary-600 whitespace-nowrap">
-              {property.price.toLocaleString("fr-BE")} EUR
+              {property.price.toLocaleString("fr-BE")} €
             </span>
             {pricePerSqm && (
               <div className={`text-xs font-medium ${getPricePerSqmColor(pricePerSqm, property.propertyType)}`}>
-                {pricePerSqm.toLocaleString("fr-BE")} EUR/m2
+                {pricePerSqm.toLocaleString("fr-BE")} €/m²
               </div>
             )}
           </div>
@@ -99,7 +99,7 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
             <span className="bg-gray-100 px-2 py-0.5 rounded-md">{property.bathrooms} sdb</span>
           )}
           {property.surface != null && (
-            <span className="bg-gray-100 px-2 py-0.5 rounded-md">{property.surface} m2</span>
+            <span className="bg-gray-100 px-2 py-0.5 rounded-md">{property.surface} m²</span>
           )}
           {property.pebScore && (
             <span className="bg-gray-100 px-2 py-0.5 rounded-md">PEB {property.pebScore}</span>

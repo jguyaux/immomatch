@@ -77,7 +77,7 @@ export function DashboardPage() {
             className="px-3 py-2 border rounded-lg text-sm"
           >
             <option value="score">Score</option>
-            <option value="recent">Plus recents</option>
+            <option value="recent">Plus récents</option>
           </select>
         </div>
       </div>
@@ -88,7 +88,7 @@ export function DashboardPage() {
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">Aucun match pour le moment</p>
           <p className="text-gray-400 mt-2">
-            Collez un lien Immoweb ci-dessus ou validez des biens depuis l'onglet Decouvertes.
+            Collez un lien Immoweb ci-dessus ou validez des biens depuis l'onglet Découvertes.
           </p>
         </div>
       ) : view === "map" ? (

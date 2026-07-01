@@ -188,34 +188,34 @@ function computeValuation(property: Property): PriceValuation {
       pricePerSqm,
       communeAvg,
       diff,
-      label: "Sous-cote",
+      label: "Sous-coté",
       labelColor: "bg-green-100 text-green-700",
-      description: `Ce bien est ${absDiff}% sous la mediane communale`,
+      description: `Ce bien est ${absDiff}% sous la médiane communale`,
     };
   } else if (diff > 25) {
     return {
       pricePerSqm,
       communeAvg,
       diff,
-      label: "Tres surevalue",
+      label: "Très surévalué",
       labelColor: "bg-red-100 text-red-700",
-      description: `Ce bien est ${absDiff}% au-dessus de la mediane`,
+      description: `Ce bien est ${absDiff}% au-dessus de la médiane`,
     };
   } else if (diff > 10) {
     return {
       pricePerSqm,
       communeAvg,
       diff,
-      label: "Surevalue",
+      label: "Surévalué",
       labelColor: "bg-orange-100 text-orange-700",
-      description: `Ce bien est ${absDiff}% au-dessus de la mediane`,
+      description: `Ce bien est ${absDiff}% au-dessus de la médiane`,
     };
   } else {
     return {
       pricePerSqm,
       communeAvg,
       diff,
-      label: "Au prix du marche",
+      label: "Au prix du marché",
       labelColor: "bg-blue-100 text-blue-700",
       description: null,
     };
@@ -310,28 +310,28 @@ function computeAge(property: Property): AgeIndicator {
   if (daysOnPlatform < 7) {
     return {
       daysOnPlatform,
-      label: "Recemment importe",
+      label: "Récemment importé",
       badgeColor: "bg-gray-100 text-gray-600",
       pulse: false,
     };
   } else if (daysOnPlatform < 30) {
     return {
       daysOnPlatform,
-      label: `Importe il y a ${daysOnPlatform} jours`,
+      label: `Importé il y a ${daysOnPlatform} jours`,
       badgeColor: "bg-gray-100 text-gray-600",
       pulse: false,
     };
   } else if (daysOnPlatform < 60) {
     return {
       daysOnPlatform,
-      label: `Annonce ancienne (${daysOnPlatform} jours) — Negociation possible`,
+      label: `Annonce ancienne (${daysOnPlatform} jours) — Négociation possible`,
       badgeColor: "bg-orange-100 text-orange-700",
       pulse: false,
     };
   } else {
     return {
       daysOnPlatform,
-      label: `Annonce longue duree (${daysOnPlatform} jours) — Fort potentiel de negociation`,
+      label: `Annonce longue durée (${daysOnPlatform} jours) — Fort potentiel de négociation`,
       badgeColor: "bg-red-100 text-red-700",
       pulse: true,
     };

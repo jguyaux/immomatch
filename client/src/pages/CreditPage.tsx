@@ -65,16 +65,16 @@ export function CreditPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      <h2 className="text-2xl font-bold">Simulateur de credit</h2>
+      <h2 className="text-2xl font-bold">Simulateur de crédit</h2>
 
       {/* Prix & Region */}
       <section className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Prix & Region</h3>
+        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Prix & Région</h3>
 
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium">Prix (EUR)</label>
+              <label className="text-sm font-medium">Prix (€)</label>
               <input
                 type="number"
                 value={price}
@@ -96,7 +96,7 @@ export function CreditPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium block mb-2">Region</label>
+            <label className="text-sm font-medium block mb-2">Région</label>
             <div className="flex flex-wrap gap-2">
               {REGIONS.map((r) => (
                 <button
@@ -119,12 +119,12 @@ export function CreditPage() {
 
       {/* Parametres */}
       <section className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Parametres</h3>
+        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Paramètres</h3>
 
         <div className="space-y-5">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium">Apport (EUR)</label>
+              <label className="text-sm font-medium">Apport (€)</label>
               <input
                 type="number"
                 value={downPayment}
@@ -147,7 +147,7 @@ export function CreditPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium">Duree</label>
+              <label className="text-sm font-medium">Durée</label>
               <span className="text-sm font-semibold">{duration} ans</span>
             </div>
             <input
@@ -209,7 +209,7 @@ export function CreditPage() {
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-600">Prix du bien</span>
-            <span className="font-medium">{price.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-medium">{price.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-gray-600">
@@ -218,40 +218,40 @@ export function CreditPage() {
                 ~{simulation.registrationRate}%
               </span>
             </span>
-            <span className="font-medium">{simulation.registrationFees.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-medium">{simulation.registrationFees.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Frais de notaire (~1.5%)</span>
-            <span className="font-medium">{simulation.notaryFees.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-medium">{simulation.notaryFees.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Dossier banque (~1%)</span>
-            <span className="font-medium">{simulation.bankFees.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-medium">{simulation.bankFees.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="border-t pt-3 flex justify-between">
-            <span className="text-gray-600">Total a financer</span>
-            <span className="font-semibold">{simulation.totalToFinance.toLocaleString("fr-BE")} EUR</span>
+            <span className="text-gray-600">Total à financer</span>
+            <span className="font-semibold">{simulation.totalToFinance.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Apport personnel</span>
-            <span className="font-medium">- {downPayment.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-medium">- {downPayment.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="border-t pt-3 flex justify-between">
-            <span className="font-semibold">Montant emprunte</span>
-            <span className="font-bold text-lg">{simulation.borrowed.toLocaleString("fr-BE")} EUR</span>
+            <span className="font-semibold">Montant emprunté</span>
+            <span className="font-bold text-lg">{simulation.borrowed.toLocaleString("fr-BE")} €</span>
           </div>
         </div>
       </section>
 
       {/* Resultat */}
       <section className="bg-white rounded-xl shadow-sm border p-6">
-        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Resultat</h3>
+        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Résultat</h3>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs text-gray-500 mb-1">Mensualite</p>
+            <p className="text-xs text-gray-500 mb-1">Mensualité</p>
             <p className="text-2xl font-bold text-primary-600">
-              {simulation.monthly.toLocaleString("fr-BE")} EUR/mois
+              {simulation.monthly.toLocaleString("fr-BE")} €/mois
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
@@ -261,23 +261,23 @@ export function CreditPage() {
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs text-gray-500 mb-1">Interets totaux</p>
+            <p className="text-xs text-gray-500 mb-1">Intérêts totaux</p>
             <p className="text-2xl font-bold text-orange-500">
-              {simulation.totalInterest.toLocaleString("fr-BE")} EUR
+              {simulation.totalInterest.toLocaleString("fr-BE")} €
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs text-gray-500 mb-1">Cout total credit</p>
+            <p className="text-xs text-gray-500 mb-1">Coût total crédit</p>
             <p className="text-2xl font-bold text-gray-800">
-              {simulation.totalCost.toLocaleString("fr-BE")} EUR
+              {simulation.totalCost.toLocaleString("fr-BE")} €
             </p>
           </div>
         </div>
 
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Capacite max (regle 33%)</span>
-            <span className="text-sm font-semibold">Max: {simulation.maxLoan.toLocaleString("fr-BE")} EUR</span>
+            <span className="text-sm font-medium">Capacité max (règle 33%)</span>
+            <span className="text-sm font-semibold">Max: {simulation.maxLoan.toLocaleString("fr-BE")} €</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div

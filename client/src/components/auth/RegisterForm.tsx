@@ -89,7 +89,7 @@ export function RegisterForm({ onToggle }: { onToggle: () => void }) {
         </button>
       </form>
       <p className="text-center mt-4 text-sm text-gray-600">
-        Deja un compte ?{" "}
+        Déjà un compte ?{" "}
         <button onClick={onToggle} className="text-primary-600 hover:underline">
           Se connecter
         </button>

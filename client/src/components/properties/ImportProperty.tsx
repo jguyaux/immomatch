@@ -92,11 +92,11 @@ export function ImportProperty({ onImported }: { onImported: () => void }) {
           )}
           {!result.match && (
             <p className="text-sm text-green-700 mt-2">
-              Bien importe. Remplissez vos criteres pour obtenir un score IA.
+              Bien importé. Remplissez vos critères pour obtenir un score IA.
             </p>
           )}
           {result.alreadyScored && (
-            <p className="text-sm text-green-600 mt-1 italic">Ce bien avait deja ete score.</p>
+            <p className="text-sm text-green-600 mt-1 italic">Ce bien avait déjà été scoré.</p>
           )}
         </div>
       )}

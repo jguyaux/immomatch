@@ -29,7 +29,7 @@ export function ComparePage() {
       <div>
         <h2 className="text-2xl font-bold mb-2">Comparateur</h2>
         <p className="text-gray-500 mb-6">
-          Comparez jusqu'a 3 biens cote a cote pour faire le meilleur choix.
+          Comparez jusqu'à 3 biens côte à côte pour faire le meilleur choix.
         </p>
         <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -37,7 +37,7 @@ export function ComparePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
           </div>
-          <p className="text-gray-500 text-lg mb-2">Aucun bien a comparer</p>
+          <p className="text-gray-500 text-lg mb-2">Aucun bien à comparer</p>
           <p className="text-gray-400">
             Cliquez sur "Comparer" sur une fiche bien depuis vos matchs pour l'ajouter ici.
           </p>
@@ -78,11 +78,11 @@ export function ComparePage() {
       getValue: (i) => {
         const p = compareList[i]?.property;
         if (!p) return null;
-        return <span className="font-bold text-primary-600">{p.price.toLocaleString("fr-BE")} EUR</span>;
+        return <span className="font-bold text-primary-600">{p.price.toLocaleString("fr-BE")} €</span>;
       },
     },
     {
-      label: "Prix/m2",
+      label: "Prix/m²",
       getValue: (i) => {
         const p = compareList[i]?.property;
         if (!p) return null;
@@ -90,7 +90,7 @@ export function ComparePage() {
         if (!ppsm) return <span className="text-gray-400">-</span>;
         return (
           <span className={`font-medium ${getPricePerSqmColor(ppsm, p.propertyType)}`}>
-            {ppsm.toLocaleString("fr-BE")} EUR/m2
+            {ppsm.toLocaleString("fr-BE")} €/m²
           </span>
         );
       },
@@ -100,7 +100,7 @@ export function ComparePage() {
       getValue: (i) => {
         const p = compareList[i]?.property;
         if (!p || !p.surface) return <span className="text-gray-400">-</span>;
-        return <span>{p.surface} m2</span>;
+        return <span>{p.surface} m²</span>;
       },
     },
     {
@@ -188,7 +188,7 @@ export function ComparePage() {
         <div>
           <h2 className="text-2xl font-bold">Comparateur</h2>
           <p className="text-gray-500">
-            {compareList.length} bien{compareList.length > 1 ? "s" : ""} selectionne{compareList.length > 1 ? "s" : ""} (max. 3)
+            {compareList.length} bien{compareList.length > 1 ? "s" : ""} sélectionné{compareList.length > 1 ? "s" : ""} (max. 3)
           </p>
         </div>
         <button

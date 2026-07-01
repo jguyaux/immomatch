@@ -15,7 +15,7 @@ export function Header() {
               ImmoMatch
             </h1>
             <p className="text-[10px] text-gray-400 leading-none tracking-wider uppercase">
-              Trouvez votre bien ideal
+              Trouvez votre bien idéal
             </p>
           </div>
         </div>
@@ -33,7 +33,7 @@ export function Header() {
               onClick={signOut}
               className="text-sm text-gray-400 hover:text-gray-600 transition px-3 py-1.5 rounded-lg hover:bg-gray-100"
             >
-              Deconnexion
+              Déconnexion
             </button>
           </div>
         )}

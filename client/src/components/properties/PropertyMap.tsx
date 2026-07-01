@@ -41,7 +41,7 @@ export function PropertyMap({ matches, onSelect }: PropertyMapProps) {
   if (geoMatches.length === 0) {
     return (
       <div className="bg-gray-100 rounded-xl h-96 flex items-center justify-center text-gray-500">
-        Aucun bien avec coordonnees GPS
+        Aucun bien avec coordonnées GPS
       </div>
     );
   }
@@ -74,11 +74,11 @@ export function PropertyMap({ matches, onSelect }: PropertyMapProps) {
               <div className="min-w-48">
                 <p className="font-semibold text-sm">{match.property!.title}</p>
                 <p className="text-primary-600 font-bold">
-                  {match.property!.price.toLocaleString("fr-BE")} EUR
+                  {match.property!.price.toLocaleString("fr-BE")} €
                 </p>
                 <div className="text-xs text-gray-600 mt-1">
                   {match.property!.bedrooms != null && <span>{match.property!.bedrooms} ch. </span>}
-                  {match.property!.surface != null && <span>{match.property!.surface} m2 </span>}
+                  {match.property!.surface != null && <span>{match.property!.surface} m² </span>}
                   {match.property!.pebScore && <span>PEB {match.property!.pebScore}</span>}
                 </div>
                 <p className="text-xs mt-1">Score: <strong>{match.score}/100</strong></p>

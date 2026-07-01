@@ -53,9 +53,9 @@ function FloodBadge({ risk }: { risk: NeighborhoodInfo["floodRisk"] }) {
   const config: Record<string, { color: string; label: string }> = {
     none: { color: "bg-green-100 text-green-800", label: "Hors zone inondable" },
     low: { color: "bg-yellow-100 text-yellow-800", label: "Risque faible" },
-    medium: { color: "bg-orange-100 text-orange-800", label: "Risque modere" },
+    medium: { color: "bg-orange-100 text-orange-800", label: "Risque modéré" },
     high: { color: "bg-red-100 text-red-800", label: "Zone inondable" },
-    unknown: { color: "bg-gray-100 text-gray-500", label: "Donnees indisponibles" },
+    unknown: { color: "bg-gray-100 text-gray-500", label: "Données indisponibles" },
   };
   const c = config[risk] ?? config.unknown;
   return (
@@ -75,7 +75,7 @@ export function NeighborhoodCard({ propertyId, hasCoords }: NeighborhoodCardProp
     return (
       <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-400 italic">
-          Coordonnees GPS non disponibles pour ce bien
+          Coordonnées GPS non disponibles pour ce bien
         </p>
       </div>
     );
@@ -120,7 +120,7 @@ export function NeighborhoodCard({ propertyId, hasCoords }: NeighborhoodCardProp
       {expanded && (
         <div className="mt-3 space-y-4">
           {loading && (
-            <p className="text-xs text-gray-400 animate-pulse">Chargement des donnees du quartier...</p>
+            <p className="text-xs text-gray-400 animate-pulse">Chargement des données du quartier...</p>
           )}
           {error && (
             <p className="text-xs text-red-500">{error}</p>
@@ -154,7 +154,7 @@ export function NeighborhoodCard({ propertyId, hasCoords }: NeighborhoodCardProp
               {/* Schools */}
               {data.schools.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Ecoles (5km)</h4>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Écoles (5km)</h4>
                   <div className="space-y-1">
                     {data.schools.map((s, i) => (
                       <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
@@ -171,23 +171,23 @@ export function NeighborhoodCard({ propertyId, hasCoords }: NeighborhoodCardProp
 
               {/* Marché immobilier */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Marche immobilier</h4>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Marché immobilier</h4>
                 <div className="space-y-2">
                   {data.commune && (
                     <div className="text-xs text-gray-700">
                       <span className="font-medium">{data.commune}</span>
                       {data.priceEvolution5y != null && (
                         <span className={`ml-2 font-semibold ${getPriceEvolutionColor(data.priceEvolution5y)}`}>
-                          Evolution des prix 2020-2025: +{data.priceEvolution5y}%
+                          Évolution des prix 2020-2025: +{data.priceEvolution5y}%
                         </span>
                       )}
                       {data.priceEvolution5y == null && (
-                        <span className="ml-2 text-gray-400">Evolution des prix: donnees non disponibles</span>
+                        <span className="ml-2 text-gray-400">Évolution des prix: données non disponibles</span>
                       )}
                     </div>
                   )}
                   {!data.commune && data.priceEvolution5y == null && (
-                    <p className="text-xs text-gray-400">Evolution des prix: donnees non disponibles</p>
+                    <p className="text-xs text-gray-400">Évolution des prix: données non disponibles</p>
                   )}
                   {data.potentialScore != null && (
                     <div className="flex items-center gap-2">

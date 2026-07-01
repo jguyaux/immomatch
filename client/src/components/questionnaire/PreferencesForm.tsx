@@ -11,20 +11,20 @@ const PEB_SCORES: PebScore[] = ["A", "B", "C", "D", "E", "F", "G"];
 const COMMON_FEATURES = [
   "Jardin", "Terrasse", "Balcon", "Garage", "Parking", "Cave",
   "Grenier", "Ascenseur", "Piscine", "Alarme", "Climatisation",
-  "Panneaux solaires", "Pompe a chaleur", "Double vitrage",
-  "Cheminee", "Dressing", "Buanderie", "Bureau",
-  "Proche transports", "Proche ecoles", "Proche commerces",
-  "Quartier calme", "Vue degagee", "Nature alentour",
+  "Panneaux solaires", "Pompe à chaleur", "Double vitrage",
+  "Cheminée", "Dressing", "Buanderie", "Bureau",
+  "Proche transports", "Proche écoles", "Proche commerces",
+  "Quartier calme", "Vue dégagée", "Nature alentour",
 ];
 
 const DEAL_BREAKERS = [
-  "Travaux importants", "Zone inondable", "Proximite autoroute",
-  "Pas de jardin", "Pas de garage", "Rez-de-chaussee",
-  "PEB F ou G", "Toiture a refaire", "Problemes d'humidite",
+  "Travaux importants", "Zone inondable", "Proximité autoroute",
+  "Pas de jardin", "Pas de garage", "Rez-de-chaussée",
+  "PEB F ou G", "Toiture à refaire", "Problèmes d'humidité",
 ];
 
 const PROPERTY_CONDITIONS = [
-  "Neuf", "Excellent", "Bon", "A rafraichir", "A renover",
+  "Neuf", "Excellent", "Bon", "À rafraîchir", "À rénover",
 ];
 
 interface PreferencesFormProps {
@@ -121,7 +121,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Minimum {form.transactionType === "location" ? "(EUR/mois)" : "(EUR)"}
+              Minimum {form.transactionType === "location" ? "(€/mois)" : "(€)"}
             </label>
             <input
               type="number"
@@ -134,7 +134,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">
-              Maximum {form.transactionType === "location" ? "(EUR/mois)" : "(EUR)"}
+              Maximum {form.transactionType === "location" ? "(€/mois)" : "(€)"}
             </label>
             <input
               type="number"
@@ -150,7 +150,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Localisation</h3>
-        <p className="text-sm text-gray-500 mb-3">Ajoutez les villes ou communes ou vous cherchez</p>
+        <p className="text-sm text-gray-500 mb-3">Ajoutez les villes ou communes où vous cherchez</p>
         <CitySearch
           selected={form.zones}
           onChange={(zones) => setForm({ ...form, zones })}
@@ -202,7 +202,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
               className="w-full px-3 py-2 border rounded-lg"
               min={0}
               max={10}
-              placeholder="Illimite"
+              placeholder="Illimité"
             />
           </div>
           <div>
@@ -223,7 +223,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
         <h3 className="text-lg font-semibold mb-3">Superficie</h3>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Habitable min (m2)</label>
+            <label className="block text-sm font-medium mb-1">Habitable min (m²)</label>
             <input
               type="number"
               value={form.surfaceMin ?? ""}
@@ -235,7 +235,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Habitable max (m2)</label>
+            <label className="block text-sm font-medium mb-1">Habitable max (m²)</label>
             <input
               type="number"
               value={form.surfaceMax ?? ""}
@@ -247,7 +247,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Terrain min (m2)</label>
+            <label className="block text-sm font-medium mb-1">Terrain min (m²)</label>
             <input
               type="number"
               value={form.landSurfaceMin ?? ""}
@@ -262,7 +262,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Score PEB accepte</h3>
+        <h3 className="text-lg font-semibold mb-3">Score PEB accepté</h3>
         <div className="flex gap-2">
           {PEB_SCORES.map((score) => {
             const pebColors: Record<string, string> = {
@@ -288,7 +288,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Etat du bien</h3>
+        <h3 className="text-lg font-semibold mb-3">État du bien</h3>
         <div className="flex flex-wrap gap-2">
           {PROPERTY_CONDITIONS.map((condition) => (
             <button
@@ -328,8 +328,8 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Criteres eliminatoires</h3>
-        <p className="text-sm text-gray-500 mb-3">Un bien avec ces criteres sera penalise fortement</p>
+        <h3 className="text-lg font-semibold mb-3">Critères éliminatoires</h3>
+        <p className="text-sm text-gray-500 mb-3">Un bien avec ces critères sera pénalisé fortement</p>
         <div className="flex flex-wrap gap-2">
           {DEAL_BREAKERS.map((item) => (
             <button
@@ -349,12 +349,12 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
       </section>
 
       <section>
-        <h3 className="text-lg font-semibold mb-3">Notes supplementaires</h3>
+        <h3 className="text-lg font-semibold mb-3">Notes supplémentaires</h3>
         <textarea
           value={form.notes ?? ""}
           onChange={(e) => setForm({ ...form, notes: e.target.value || null })}
           className="w-full px-3 py-2 border rounded-lg h-24 resize-none"
-          placeholder="Precisez vos criteres importants, votre situation, ce que vous recherchez en priorite..."
+          placeholder="Précisez vos critères importants, votre situation, ce que vous recherchez en priorité..."
         />
       </section>
 
@@ -363,7 +363,7 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
         disabled={loading}
         className="w-full py-3 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 font-medium text-lg"
       >
-        {loading ? "Sauvegarde..." : "Sauvegarder mes criteres"}
+        {loading ? "Sauvegarde..." : "Sauvegarder mes critères"}
       </button>
     </form>
   );
