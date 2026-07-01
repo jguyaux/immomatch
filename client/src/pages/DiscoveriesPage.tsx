@@ -283,51 +283,62 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
 
               return (
                 <div key={match.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
-                  <div className="flex">
+                  <div className="flex flex-col sm:flex-row">
+                    {/* Image */}
                     <div className="relative flex-shrink-0">
                       {property.imageUrls[0] ? (
                         <img
                           src={property.imageUrls[0]}
                           alt={property.title}
-                          className="w-48 h-44 object-cover"
+                          className="w-full h-48 sm:w-44 sm:h-full object-cover"
                         />
                       ) : (
-                        <div className="w-48 h-44 bg-gray-200 flex items-center justify-center text-gray-400">
+                        <div className="w-full h-40 sm:w-44 sm:h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
                           Pas d'image
                         </div>
                       )}
+                      {/* Source badge */}
                       <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-xs font-semibold shadow-sm ${sourceInfo.color}`}>
                         {sourceInfo.label}
                       </span>
+                      {/* Score circle — overlay sur l'image en mobile */}
+                      <div className={`absolute top-2 right-2 sm:hidden w-11 h-11 rounded-full bg-gradient-to-br ${scoreColor} flex flex-col items-center justify-center shadow-md`}>
+                        <span className="text-sm font-bold leading-none">{match.score}</span>
+                        <span className="text-[8px] opacity-80 leading-none">/100</span>
+                      </div>
                     </div>
 
-                    <div className="flex-1 p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold leading-tight">{property.title}</h3>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {property.city} {property.zipCode && `(${property.zipCode})`}
+                    {/* Content */}
+                    <div className="flex-1 p-3 sm:p-4 min-w-0">
+                      {/* Header : titre + prix + score */}
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold leading-tight text-sm sm:text-base line-clamp-2">{property.title}</h3>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {property.city}{property.zipCode && ` (${property.zipCode})`}
                           </p>
                         </div>
-                        <div className="flex items-center gap-3 ml-4">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           <div className="text-right">
-                            <span className="text-lg font-bold text-primary-600 whitespace-nowrap">
-                              {property.price.toLocaleString("fr-BE")} EUR
-                            </span>
+                            <div className="text-sm sm:text-base font-bold text-primary-600 whitespace-nowrap">
+                              {property.price.toLocaleString("fr-BE")} €
+                            </div>
                             {pricePerSqm && (
                               <div className={`text-xs font-medium ${getPricePerSqmColor(pricePerSqm, property.propertyType)}`}>
-                                {pricePerSqm.toLocaleString("fr-BE")} EUR/m2
+                                {pricePerSqm.toLocaleString("fr-BE")} €/m²
                               </div>
                             )}
                           </div>
-                          <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${scoreColor} flex flex-col items-center justify-center shadow-md flex-shrink-0`}>
+                          {/* Score circle — visible seulement en desktop */}
+                          <div className={`hidden sm:flex w-12 h-12 rounded-full bg-gradient-to-br ${scoreColor} flex-col items-center justify-center shadow-md flex-shrink-0`}>
                             <span className="text-base font-bold leading-none">{match.score}</span>
                             <span className="text-[8px] opacity-80 leading-none">/100</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 text-sm text-gray-600 mb-2">
+                      {/* Chips */}
+                      <div className="flex flex-wrap gap-1.5 mb-2">
                         {property.bedrooms != null && (
                           <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs">{property.bedrooms} ch.</span>
                         )}
@@ -335,7 +346,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                           <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs">{property.bathrooms} sdb</span>
                         )}
                         {property.surface != null && (
-                          <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs">{property.surface} m2</span>
+                          <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs">{property.surface} m²</span>
                         )}
                         {property.pebScore && (
                           <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs">PEB {property.pebScore}</span>
@@ -343,12 +354,13 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                         <span className="bg-gray-100 px-2 py-0.5 rounded-md text-xs capitalize">{property.propertyType}</span>
                       </div>
 
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{match.reasoning}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{match.reasoning}</p>
 
-                      <div className="flex gap-2">
+                      {/* Boutons */}
+                      <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleValidate(match.id)}
-                          className="px-4 py-1.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition"
+                          className="flex-1 sm:flex-none px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition text-center"
                         >
                           Ajouter aux matchs
                         </button>
@@ -356,15 +368,16 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                           href={property.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-1.5 bg-primary-50 text-primary-600 rounded-lg text-sm font-medium hover:bg-primary-100 transition"
+                          className="flex-1 sm:flex-none px-3 py-1.5 bg-primary-50 text-primary-600 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary-100 transition text-center"
                         >
                           Voir l'annonce
                         </a>
                         <button
                           onClick={() => handleDismiss(match.id)}
-                          className="px-4 py-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg text-sm transition"
+                          className="px-3 py-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg text-xs sm:text-sm transition whitespace-nowrap"
+                          title="Pas interessé"
                         >
-                          Pas interesse
+                          ✕ Ignorer
                         </button>
                       </div>
                     </div>

@@ -33,7 +33,7 @@ export async function parseImmowebUrl(url: string): Promise<Property> {
     externalId,
     source: "immoweb",
     url,
-    title: classified.title || buildTitle(classified),
+    title: buildTitle(classified),
     description: classified.description || null,
     price: classified.price?.mainValue || classified.transaction?.sale?.price || 0,
     propertyType: mapPropertyType(classified.property?.type || ""),
@@ -84,13 +84,19 @@ function extractIdFromUrl(url: string): string {
   return match ? match[1] : `unknown-${Date.now()}`;
 }
 
+const FRENCH_TYPE_NAMES: Record<string, string> = {
+  HOUSE: "Maison", APARTMENT: "Appartement", VILLA: "Villa", STUDIO: "Studio",
+  DUPLEX: "Duplex", FLAT: "Appartement", GROUND_FLOOR: "Rez-de-chaussee",
+  BUILDING: "Immeuble", LAND: "Terrain", FARMHOUSE: "Ferme", CASTLE: "Chateau",
+  MIXED_USE_BUILDING: "Immeuble mixte", EXCEPTIONAL_PROPERTY: "Bien exceptionnel",
+};
+
 function buildTitle(data: Record<string, any>): string {
-  const type = data.property?.type || "";
-  const subtype = data.property?.subtype || "";
+  const type = (data.property?.subtype || data.property?.type || "").toUpperCase();
   const city = data.property?.location?.locality || "";
   const bedrooms = data.property?.bedroomCount;
-  const typeName = subtype || type || "Bien";
-  const parts = [typeName.charAt(0).toUpperCase() + typeName.slice(1).toLowerCase()];
+  const typeName = FRENCH_TYPE_NAMES[type] || "Bien";
+  const parts: string[] = [typeName];
   if (bedrooms) parts.push(`${bedrooms} ch.`);
   if (city) parts.push(`a ${city}`);
   return parts.join(" - ");
