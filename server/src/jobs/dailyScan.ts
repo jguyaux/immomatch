@@ -15,13 +15,13 @@ export function startDailyScanJob() {
 
 const SCAN_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes max
 
-export async function runDailyScanWithProgress(send: ProgressFn) {
-  console.log("[CRON] Debut du scan quotidien");
+export async function runDailyScanWithProgress(send: ProgressFn, userId?: string) {
+  console.log(`[CRON] Debut du scan${userId ? ` (user ${userId})` : " quotidien"}`);
 
   const timeout = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error("Scan timeout (5 min)")), SCAN_TIMEOUT_MS)
   );
-  return Promise.race([_runScan(send), timeout]);
+  return Promise.race([_runScan(send, userId), timeout]);
 }
 
 function withSourceTimeout<T>(promise: Promise<T>, label: string, ms: number): Promise<T> {
@@ -33,8 +33,8 @@ function withSourceTimeout<T>(promise: Promise<T>, label: string, ms: number): P
   ]);
 }
 
-async function _runScan(send: ProgressFn) {
-  const userPrefs = await getAllUserPrefs();
+async function _runScan(send: ProgressFn, userId?: string) {
+  const userPrefs = await getAllUserPrefs(userId);
   const zones = [...new Set(userPrefs.flatMap((p) => p.zones))];
   const transactionType = userPrefs[0]?.transaction_type || "achat";
   const propertyTypes = [...new Set(userPrefs.flatMap((p) => p.property_types))];
@@ -93,9 +93,9 @@ async function _runScan(send: ProgressFn) {
   return { imported: totalImported, matched };
 }
 
-async function getAllUserPrefs(): Promise<{ zones: string[]; transaction_type: string; property_types: string[] }[]> {
-  const { data } = await supabase
-    .from("user_preferences")
-    .select("zones, transaction_type, property_types");
+async function getAllUserPrefs(userId?: string): Promise<{ zones: string[]; transaction_type: string; property_types: string[] }[]> {
+  let query = supabase.from("user_preferences").select("zones, transaction_type, property_types");
+  if (userId) query = query.eq("user_id", userId);
+  const { data } = await query;
   return data || [];
 }

@@ -12,7 +12,8 @@ router.get("/scan/progress", requireAuth, (_req, res: Response) => {
   res.json(getScanProgress());
 });
 
-router.post("/scan", requireAuth, async (_req, res: Response) => {
+router.post("/scan", requireAuth, async (req, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
   const current = getScanProgress();
   if (current.status === "running") {
     res.json({ status: "already_running" });
@@ -29,7 +30,7 @@ router.post("/scan", requireAuth, async (_req, res: Response) => {
       source: (data.source as string) ?? "",
       message: (data.message as string) ?? "",
     });
-  }).then((result) => {
+  }, authReq.userId).then((result) => {
     updateScanProgress({
       status: "done",
       step: 4,

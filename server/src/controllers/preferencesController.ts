@@ -53,8 +53,8 @@ export async function upsertPreferences(req: AuthenticatedRequest, res: Response
     .from("property_matches")
     .delete()
     .eq("user_id", req.userId)
-    .eq("is_validated", false)
-    .eq("is_dismissed", false);
+    .not("is_validated", "eq", true)
+    .not("is_dismissed", "eq", true);
 
   res.json({ preferences: data });
 }
