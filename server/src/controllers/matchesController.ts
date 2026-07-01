@@ -90,17 +90,19 @@ export async function getDiscoveries(req: AuthenticatedRequest, res: Response) {
     .from("property_matches")
     .select("*, properties(*)", { count: "exact" })
     .eq("user_id", req.userId)
-    .or("is_validated.eq.false,is_validated.is.null")
-    .or("is_dismissed.eq.false,is_dismissed.is.null")
+    .not("is_validated", "eq", true)
+    .not("is_dismissed", "eq", true)
     .gte("score", 50)
     .order("score", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) {
+    console.error("[getDiscoveries] Erreur Supabase:", error);
     res.status(500).json({ error: error.message });
     return;
   }
 
+  console.log(`[getDiscoveries] user=${req.userId} count=${count} rows=${data?.length}`);
   res.json({
     discoveries: (data || []).map(mapMatch),
     pagination: { page, limit, total: count },
@@ -154,8 +156,8 @@ export async function getDiscoveriesCount(req: AuthenticatedRequest, res: Respon
     .from("property_matches")
     .select("id", { count: "exact", head: true })
     .eq("user_id", req.userId)
-    .or("is_validated.eq.false,is_validated.is.null")
-    .or("is_dismissed.eq.false,is_dismissed.is.null")
+    .not("is_validated", "eq", true)
+    .not("is_dismissed", "eq", true)
     .gte("score", 50);
 
   if (error) {

@@ -14,10 +14,11 @@ export async function processMatchesForUser(userId: string): Promise<number> {
     .from("property_matches")
     .delete()
     .eq("user_id", userId)
-    .eq("is_validated", false)
-    .eq("is_dismissed", false);
+    .not("is_validated", "eq", true)
+    .not("is_dismissed", "eq", true);
 
   const newProperties = await getUnscoredProperties(userId, preferences);
+  console.log(`[Matching] user=${userId} zones=${JSON.stringify(preferences.zones)} props=${newProperties.length}`);
   let matchCount = 0;
 
   for (const property of newProperties) {
