@@ -20,7 +20,7 @@ const TYPE_MAP: Record<string, string> = {
 
 // Postal code ranges [min, max] for Belgian cities/zones
 const ZONE_ZIP_RANGES: Record<string, [number, number][]> = {
-  namur: [[5000, 5024]],
+  namur: [[5000, 5024], [5100, 5110]],
   bruxelles: [[1000, 1299]],
   "bruxelles capitale": [[1000, 1299]],
   "mont saint guibert": [[1435, 1435]],

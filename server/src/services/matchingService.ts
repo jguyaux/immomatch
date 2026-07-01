@@ -165,9 +165,19 @@ async function getUnscoredProperties(userId: string, prefs: UserPreferences): Pr
       const searchFields = [p.city, p.address, p.zipCode, p.url]
         .filter(Boolean)
         .map((s) => normalize(s!));
-      return normalizedZones.some((zone) =>
+      const textMatch = normalizedZones.some((zone) =>
         searchFields.some((f) => f === zone || f.includes(zone) || zone.includes(f))
       );
+      if (textMatch) return true;
+
+      // Verifier aussi par plage de codes postaux (ex: Jambes 5100 appartient a Namur)
+      if (p.zipCode) {
+        const zip = parseInt(p.zipCode, 10);
+        if (!isNaN(zip)) {
+          return normalizedZones.some((zone) => zipInZoneRange(zip, zone));
+        }
+      }
+      return false;
     });
   }
 
@@ -183,10 +193,12 @@ function violatesDealBreaker(p: Property, dealBreakers: string[], rawText: strin
         if (p.pebScore === "F" || p.pebScore === "G") return true;
         break;
       case "Pas de jardin":
-        if (!text.includes("jardin") && !p.features.some((f) => normalize(f).includes("jardin"))) return true;
+        // Rejeter seulement si explicitement sans jardin (ne pas rejeter si non mentionné)
+        if (["pas de jardin", "sans jardin", "zonder tuin", "no garden", "geen tuin"].some((w) => text.includes(w))) return true;
         break;
       case "Pas de garage":
-        if (!text.includes("garage") && !p.features.some((f) => normalize(f).includes("garage"))) return true;
+        // Rejeter seulement si explicitement sans garage
+        if (["pas de garage", "sans garage", "zonder garage", "no garage", "geen garage"].some((w) => text.includes(w))) return true;
         break;
       case "Travaux importants":
         if (["a renover", "travaux importants", "gros travaux", "a rafraichir entierement"].some((w) => text.includes(normalize(w)))) return true;
@@ -215,4 +227,34 @@ function normalize(str: string): string {
     .replace(/[̀-ͯ]/g, "")
     .replace(/-/g, " ")
     .trim();
+}
+
+const ZONE_ZIP_RANGES: Record<string, [number, number][]> = {
+  namur: [[5000, 5024], [5100, 5110]],
+  bruxelles: [[1000, 1299]],
+  "bruxelles capitale": [[1000, 1299]],
+  mons: [[7000, 7099]],
+  liege: [[4000, 4199]],
+  charleroi: [[6000, 6199]],
+  wavre: [[1300, 1399]],
+  louvain: [[3000, 3099]],
+  leuven: [[3000, 3099]],
+  gent: [[9000, 9099]],
+  antwerpen: [[2000, 2199]],
+  ottignies: [[1340, 1349]],
+  "louvain la neuve": [[1348, 1348]],
+  nivelles: [[1400, 1499]],
+  arlon: [[6700, 6799]],
+  tournai: [[7500, 7599]],
+  verviers: [[4800, 4899]],
+};
+
+function zipInZoneRange(zip: number, normalizedZone: string): boolean {
+  for (const [key, ranges] of Object.entries(ZONE_ZIP_RANGES)) {
+    const keyNorm = normalize(key);
+    if (keyNorm === normalizedZone || keyNorm.includes(normalizedZone) || normalizedZone.includes(keyNorm)) {
+      if (ranges.some(([min, max]) => zip >= min && zip <= max)) return true;
+    }
+  }
+  return false;
 }
