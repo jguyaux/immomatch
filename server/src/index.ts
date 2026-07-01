@@ -5,6 +5,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import preferencesRouter from "./routes/preferences.js";
 import matchesRouter from "./routes/matches.js";
 import propertiesRouter from "./routes/properties.js";
+import neighborhoodRouter from "./routes/neighborhood.js";
 import { startDailyScanJob } from "./jobs/dailyScan.js";
 
 const app = express();
@@ -20,6 +21,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/preferences", preferencesRouter);
 app.use("/api/matches", matchesRouter);
 app.use("/api/properties", propertiesRouter);
+app.use("/api", neighborhoodRouter);
 
 app.use(errorHandler);
 

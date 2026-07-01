@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { api } from "../services/api";
 import type { PropertyMatch, PropertyType } from "../../../shared/types";
 import { PhotoCarousel } from "../components/properties/PhotoCarousel";
+import { NeighborhoodCard } from "../components/properties/NeighborhoodCard";
 
 interface DiscoveriesPageProps {
   onCountChange?: (count: number) => void;
@@ -346,8 +347,10 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
 
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{match.reasoning}</p>
 
+                      <NeighborhoodCard propertyId={match.id} hasCoords={!!(property.latitude && property.longitude)} />
+
                       {/* Boutons */}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <button
                           onClick={() => handleValidate(match.id)}
                           className="flex-1 sm:flex-none px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-green-700 transition text-center"
