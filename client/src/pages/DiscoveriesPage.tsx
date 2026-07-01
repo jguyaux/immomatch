@@ -48,6 +48,9 @@ function getSourceLabel(source: string): { label: string; color: string } {
 
 export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [discoveries, setDiscoveries] = useState<PropertyMatch[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
@@ -105,15 +108,33 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
 
   const loadDiscoveries = async () => {
     setLoading(true);
+    setPage(1);
     try {
-      const data = (await api.getDiscoveries()) as { discoveries: PropertyMatch[] };
+      const data = (await api.getDiscoveries(1)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
       const list = data.discoveries || [];
       setDiscoveries(list);
-      onCountChange?.(list.length);
+      setTotal(data.pagination?.total ?? list.length);
+      onCountChange?.(data.pagination?.total ?? list.length);
     } catch (err) {
       console.error("Erreur chargement decouvertes:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const data = (await api.getDiscoveries(nextPage)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
+      const newItems = data.discoveries || [];
+      setDiscoveries((prev) => [...prev, ...newItems]);
+      setPage(nextPage);
+      setTotal(data.pagination?.total ?? 0);
+    } catch (err) {
+      console.error("Erreur chargement suivant:", err);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -278,7 +299,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         </div>
       ) : (
         <>
-          <p className="text-sm text-gray-400 mb-3">{discoveries.length} bien{discoveries.length > 1 ? "s" : ""} trouvé{discoveries.length > 1 ? "s" : ""}</p>
+          <p className="text-sm text-gray-400 mb-3">{total} bien{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}</p>
           <div className="space-y-4">
             {discoveries.map((match) => {
               const property = match.property;
@@ -390,6 +411,15 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
               );
             })}
           </div>
+          {discoveries.length < total && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="mt-6 w-full py-3 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition"
+            >
+              {loadingMore ? "Chargement..." : `Voir plus (${total - discoveries.length} restants)`}
+            </button>
+          )}
         </>
       )}
     </div>

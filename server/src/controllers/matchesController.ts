@@ -83,7 +83,7 @@ export async function getMatches(req: AuthenticatedRequest, res: Response) {
 
 export async function getDiscoveries(req: AuthenticatedRequest, res: Response) {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const limit = parseInt(req.query.limit as string) || 50;
   const offset = (page - 1) * limit;
 
   const { data, error, count } = await supabase
