@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../services/api";
-import type { PropertyMatch, PropertyType } from "../../../shared/types";
+import type { PropertyMatch } from "../../../shared/types";
 import { PhotoCarousel } from "../components/properties/PhotoCarousel";
 import { NeighborhoodCard } from "../components/properties/NeighborhoodCard";
 import { FinancialAnalysisCard } from "../components/properties/FinancialAnalysisCard";
@@ -8,16 +9,6 @@ import { FinancialAnalysisCard } from "../components/properties/FinancialAnalysi
 interface DiscoveriesPageProps {
   onCountChange?: (count: number) => void;
 }
-
-const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
-  { value: "maison", label: "Maison" },
-  { value: "appartement", label: "Appartement" },
-  { value: "studio", label: "Studio" },
-  { value: "duplex", label: "Duplex" },
-  { value: "villa", label: "Villa" },
-  { value: "terrain", label: "Terrain" },
-  { value: "immeuble", label: "Immeuble" },
-];
 
 function getPricePerSqm(price: number, surface: number | null): number | null {
   if (!surface || surface === 0) return null;
@@ -45,17 +36,16 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
-  const [scanProgress, setScanProgress] = useState<{ step: number; total: number; source: string; message: string } | null>(null);
-
-  // Filter state
-  const [priceMin, setPriceMin] = useState<string>("");
-  const [priceMax, setPriceMax] = useState<string>("");
-  const [minBedrooms, setMinBedrooms] = useState<string>("");
-  const [minSurface, setMinSurface] = useState<string>("");
-  const [selectedTypes, setSelectedTypes] = useState<PropertyType[]>([]);
+  const [hasCriteria, setHasCriteria] = useState<boolean | null>(null);
 
   useEffect(() => {
     loadDiscoveries();
+    api.getPreferences()
+      .then((data: unknown) => {
+        const result = data as { preferences: Record<string, unknown> | null };
+        setHasCriteria(!!(result.preferences && result.preferences.budget_max));
+      })
+      .catch(() => setHasCriteria(false));
   }, []);
 
   const loadDiscoveries = async () => {
@@ -75,7 +65,6 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const handleScan = async () => {
     setScanning(true);
     setScanResult(null);
-    setScanProgress(null);
     try {
       await api.scanProperties();
       setScanResult("Scan lancé ! Les résultats apparaîtront dans les Découvertes dans 2-5 minutes. Revenez ici pour les voir.");
@@ -105,51 +94,41 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     });
   };
 
-  const toggleType = (type: PropertyType) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
-
-  const resetFilters = () => {
-    setPriceMin("");
-    setPriceMax("");
-    setMinBedrooms("");
-    setMinSurface("");
-    setSelectedTypes([]);
-  };
-
-  const hasActiveFilters = priceMin || priceMax || minBedrooms || minSurface || selectedTypes.length > 0;
-
-  const filteredDiscoveries = useMemo(() => {
-    return discoveries.filter((match) => {
-      const p = match.property;
-      if (!p) return false;
-
-      if (priceMin && p.price < parseInt(priceMin)) return false;
-      if (priceMax && p.price > parseInt(priceMax)) return false;
-      if (minBedrooms && (p.bedrooms == null || p.bedrooms < parseInt(minBedrooms))) return false;
-      if (minSurface && (p.surface == null || p.surface < parseInt(minSurface))) return false;
-      if (selectedTypes.length > 0 && !selectedTypes.includes(p.propertyType)) return false;
-
-      return true;
-    });
-  }, [discoveries, priceMin, priceMax, minBedrooms, minSurface, selectedTypes]);
-
   return (
     <div>
-      <div className="bg-white rounded-xl shadow-sm border p-6 mb-6">
-        <div className="flex items-center justify-between">
+      {/* Étape 1 — Critères manquants */}
+      {hasCriteria === false && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="text-3xl">🎯</div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-amber-900 text-base">Commencez par définir vos critères</h3>
+            <p className="text-sm text-amber-700 mt-1">
+              ImmoMatch se base sur vos critères pour trouver les biens qui vous correspondent.
+              Sans critères, le scan ne peut pas fonctionner.
+            </p>
+          </div>
+          <Link
+            to="/preferences"
+            className="flex-shrink-0 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition text-sm"
+          >
+            Définir mes critères →
+          </Link>
+        </div>
+      )}
+
+      {/* Scan */}
+      <div className="bg-white rounded-xl shadow-sm border p-5 mb-6">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold">Scanner des biens</h3>
-            <p className="text-sm text-gray-500">
-              Scanne Immoweb, Biddit et Trevi pour trouver des biens correspondant à vos critères
+            <h3 className="text-base font-semibold">Scanner des biens</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Immoweb, Biddit et Trevi — filtrés selon vos critères
             </p>
           </div>
           <button
             onClick={handleScan}
-            disabled={scanning}
-            className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium whitespace-nowrap"
+            disabled={scanning || hasCriteria === false}
+            className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 font-medium whitespace-nowrap text-sm transition"
           >
             {scanning ? "Scan en cours..." : "Lancer le scan"}
           </button>
@@ -166,113 +145,44 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         )}
       </div>
 
-      <h2 className="text-2xl font-bold mb-2">Découvertes</h2>
-      <p className="text-gray-500 mb-4">
+      <h2 className="text-xl font-bold mb-1">Découvertes</h2>
+      <p className="text-gray-500 text-sm mb-4">
         Biens trouvés automatiquement. Validez ceux qui vous intéressent pour les ajouter à vos matchs.
       </p>
 
-      {/* Quick filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-gray-700">Filtres rapides</h3>
-          {hasActiveFilters && (
-            <button
-              onClick={resetFilters}
-              className="text-xs text-primary-600 hover:text-primary-800 font-medium transition"
-            >
-              Réinitialiser
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Prix min (€)</label>
-            <input
-              type="number"
-              value={priceMin}
-              onChange={(e) => setPriceMin(e.target.value)}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Prix max (€)</label>
-            <input
-              type="number"
-              value={priceMax}
-              onChange={(e) => setPriceMax(e.target.value)}
-              placeholder="Illimité"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Chambres min</label>
-            <select
-              value={minBedrooms}
-              onChange={(e) => setMinBedrooms(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white"
-            >
-              <option value="">Toutes</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-              <option value="5">5+</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">Surface min (m²)</label>
-            <input
-              type="number"
-              value={minSurface}
-              onChange={(e) => setMinSurface(e.target.value)}
-              placeholder="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1.5">Type de bien</label>
-          <div className="flex flex-wrap gap-2">
-            {PROPERTY_TYPES.map((pt) => (
-              <button
-                key={pt.value}
-                onClick={() => toggleType(pt.value)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                  selectedTypes.includes(pt.value)
-                    ? "bg-primary-600 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                {pt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {loading ? (
         <div className="text-center py-12 text-gray-500">Chargement...</div>
-      ) : filteredDiscoveries.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            {hasActiveFilters ? "Aucun résultat avec ces filtres" : "Aucune découverte en attente"}
-          </p>
-          <p className="text-gray-400 mt-2">
-            {hasActiveFilters
-              ? "Essayez d'élargir vos critères de filtrage."
-              : "Lancez un scan pour trouver de nouveaux biens."}
-          </p>
+      ) : discoveries.length === 0 ? (
+        <div className="text-center py-16">
+          {hasCriteria === false ? (
+            <>
+              <p className="text-4xl mb-4">🔍</p>
+              <p className="text-gray-700 text-lg font-medium">Aucun résultat pour l'instant</p>
+              <p className="text-gray-400 mt-2 text-sm">
+                Définissez vos critères, puis lancez un scan.
+              </p>
+              <Link
+                to="/preferences"
+                className="inline-block mt-4 px-5 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium transition text-sm"
+              >
+                Définir mes critères
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-4xl mb-4">🏠</p>
+              <p className="text-gray-700 text-lg font-medium">Aucune découverte en attente</p>
+              <p className="text-gray-400 mt-2 text-sm">
+                Lancez un scan pour trouver de nouveaux biens.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <>
-          {hasActiveFilters && (
-            <p className="text-sm text-gray-500 mb-3">
-              {filteredDiscoveries.length} résultat{filteredDiscoveries.length > 1 ? "s" : ""} sur {discoveries.length}
-            </p>
-          )}
+          <p className="text-sm text-gray-400 mb-3">{discoveries.length} bien{discoveries.length > 1 ? "s" : ""} trouvé{discoveries.length > 1 ? "s" : ""}</p>
           <div className="space-y-4">
-            {filteredDiscoveries.map((match) => {
+            {discoveries.map((match) => {
               const property = match.property;
               if (!property) return null;
 
