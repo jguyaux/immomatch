@@ -348,7 +348,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
 
                       <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{match.reasoning}</p>
 
-                      <NeighborhoodCard propertyId={match.id} hasCoords={!!(property.latitude && property.longitude)} />
+                      <NeighborhoodCard propertyId={property.id} hasCoords={!!(property.latitude && property.longitude)} />
 
                       <FinancialAnalysisCard match={match} />
 

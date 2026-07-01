@@ -129,7 +129,7 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
           </div>
         )}
 
-        <NeighborhoodCard propertyId={match.id} hasCoords={!!(property.latitude && property.longitude)} />
+        <NeighborhoodCard propertyId={property.id} hasCoords={!!(property.latitude && property.longitude)} />
 
         <FinancialAnalysisCard match={match} />
 
