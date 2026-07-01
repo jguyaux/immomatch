@@ -24,8 +24,16 @@ export async function runDailyScanWithProgress(send: ProgressFn) {
   return Promise.race([_runScan(send), timeout]);
 }
 
-async function _runScan(send: ProgressFn) {
+function withSourceTimeout<T>(promise: Promise<T>, label: string, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timeout (${ms / 1000}s)`)), ms)
+    ),
+  ]);
+}
 
+async function _runScan(send: ProgressFn) {
   const userPrefs = await getAllUserPrefs();
   const zones = [...new Set(userPrefs.flatMap((p) => p.zones))];
   const transactionType = userPrefs[0]?.transaction_type || "achat";
@@ -35,47 +43,53 @@ async function _runScan(send: ProgressFn) {
 
   let totalImported = 0;
 
-  // 1. Immoweb
+  // 1. Immoweb — 2 min max
   send({ type: "progress", source: "Immoweb", message: "Recherche sur Immoweb...", step: 1, total: 4 });
   try {
-    const props = await scanImmoweb(zones, transactionType, propertyTypes);
+    const props = await withSourceTimeout(
+      scanImmoweb(zones, transactionType, propertyTypes),
+      "Immoweb", 120_000
+    );
     await saveImmowebProperties(props);
     totalImported += props.length;
-    send({ type: "progress", source: "Immoweb", message: `${props.length} biens trouves sur Immoweb`, step: 1, total: 4 });
+    send({ type: "progress", source: "Immoweb", message: `${props.length} biens trouvés sur Immoweb`, step: 1, total: 4 });
   } catch (err) {
-    console.error("[CRON] Erreur scan Immoweb:", err);
-    send({ type: "progress", source: "Immoweb", message: "Erreur Immoweb, on continue...", step: 1, total: 4 });
+    const msg = err instanceof Error ? err.message : "Erreur";
+    console.error("[CRON] Erreur scan Immoweb:", msg);
+    send({ type: "progress", source: "Immoweb", message: `Immoweb ignoré (${msg}), on continue...`, step: 1, total: 4 });
   }
 
-  // 2. Biddit
+  // 2. Biddit — 90s max
   send({ type: "progress", source: "Biddit", message: "Recherche sur Biddit...", step: 2, total: 4 });
   try {
-    const props = await scanBiddit(zones);
+    const props = await withSourceTimeout(scanBiddit(zones), "Biddit", 90_000);
     await saveBidditProperties(props);
     totalImported += props.length;
-    send({ type: "progress", source: "Biddit", message: `${props.length} biens trouves sur Biddit`, step: 2, total: 4 });
+    send({ type: "progress", source: "Biddit", message: `${props.length} biens trouvés sur Biddit`, step: 2, total: 4 });
   } catch (err) {
-    console.error("[CRON] Erreur scan Biddit:", err);
-    send({ type: "progress", source: "Biddit", message: "Erreur Biddit, on continue...", step: 2, total: 4 });
+    const msg = err instanceof Error ? err.message : "Erreur";
+    console.error("[CRON] Erreur scan Biddit:", msg);
+    send({ type: "progress", source: "Biddit", message: `Biddit ignoré (${msg}), on continue...`, step: 2, total: 4 });
   }
 
-  // 3. Trevi
+  // 3. Trevi — 90s max
   send({ type: "progress", source: "Trevi", message: "Recherche sur Trevi...", step: 3, total: 4 });
   try {
-    const props = await scanTrevi(zones, transactionType);
+    const props = await withSourceTimeout(scanTrevi(zones, transactionType), "Trevi", 90_000);
     await saveTreviProperties(props);
     totalImported += props.length;
-    send({ type: "progress", source: "Trevi", message: `${props.length} biens trouves sur Trevi`, step: 3, total: 4 });
+    send({ type: "progress", source: "Trevi", message: `${props.length} biens trouvés sur Trevi`, step: 3, total: 4 });
   } catch (err) {
-    console.error("[CRON] Erreur scan Trevi:", err);
-    send({ type: "progress", source: "Trevi", message: "Erreur Trevi, on continue...", step: 3, total: 4 });
+    const msg = err instanceof Error ? err.message : "Erreur";
+    console.error("[CRON] Erreur scan Trevi:", msg);
+    send({ type: "progress", source: "Trevi", message: `Trevi ignoré (${msg}), on continue...`, step: 3, total: 4 });
   }
 
-  // 4. Matching (toujours relance pour rafraichir les decouvertes avec les criteres actuels)
+  // 4. Matching
   send({ type: "progress", source: "Matching", message: "Analyse et scoring des biens...", step: 4, total: 4 });
   const matched = await processMatchesForAllUsers();
 
-  console.log(`[CRON] Scan termine: ${totalImported} biens importes, ${matched} matchs crees`);
+  console.log(`[CRON] Scan terminé: ${totalImported} biens importés, ${matched} matchs créés`);
   return { imported: totalImported, matched };
 }
 

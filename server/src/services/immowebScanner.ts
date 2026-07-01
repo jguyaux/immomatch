@@ -100,6 +100,8 @@ function urlMatchesZone(url: string, zones: string[]): boolean {
   return false;
 }
 
+const MAX_NEW_URLS = 60;
+
 export async function scanImmoweb(
   zones: string[],
   transactionType: string = "achat",
@@ -112,13 +114,21 @@ export async function scanImmoweb(
     ? [...new Set(propertyTypes.map((t) => TYPE_MAP[t] || t))]
     : ["maison", "appartement", "villa"];
 
-  const allUrls: string[] = [];
-
+  // Lancer tous les fetchs zone×type en parallèle
+  const combinations: { zone: string; type: string }[] = [];
   for (const zone of zones) {
     for (const type of types) {
-      const urls = await fetchSearchResults(type, transaction, zone);
-      allUrls.push(...urls);
+      combinations.push({ zone, type });
     }
+  }
+
+  const allUrlsArrays = await Promise.allSettled(
+    combinations.map(({ zone, type }) => fetchSearchResults(type, transaction, zone))
+  );
+
+  const allUrls: string[] = [];
+  for (const r of allUrlsArrays) {
+    if (r.status === "fulfilled") allUrls.push(...r.value);
   }
 
   const uniqueUrls = [...new Set(allUrls)];
@@ -127,8 +137,11 @@ export async function scanImmoweb(
   const existingIds = await getExistingExternalIds(
     uniqueUrls.map((u) => `immoweb-${extractId(u)}`)
   );
-  const newUrls = uniqueUrls.filter((u) => !existingIds.has(`immoweb-${extractId(u)}`));
-  console.log(`[Immoweb] ${newUrls.length} nouvelles annonces a importer`);
+  const newUrls = uniqueUrls
+    .filter((u) => !existingIds.has(`immoweb-${extractId(u)}`))
+    .slice(0, MAX_NEW_URLS);
+
+  console.log(`[Immoweb] ${newUrls.length} nouvelles annonces a importer (cap ${MAX_NEW_URLS})`);
 
   const properties: Property[] = [];
 
@@ -147,13 +160,7 @@ export async function scanImmoweb(
       }
     }
 
-    if (i + BATCH_SIZE < newUrls.length) {
-      await new Promise((r) => setTimeout(r, 1000));
-    }
-
-    if (i % 50 === 0 && i > 0) {
-      console.log(`[Immoweb] ${i}/${newUrls.length} traitees, ${properties.length} valides`);
-    }
+    console.log(`[Immoweb] ${Math.min(i + BATCH_SIZE, newUrls.length)}/${newUrls.length} parsees, ${properties.length} valides`);
   }
 
   console.log(`[Immoweb] ${properties.length} biens importes`);
@@ -245,8 +252,6 @@ async function fetchSearchResults(type: string, transaction: string, zone: strin
 
       allUrls.push(...newOnPage);
       console.log(`[Immoweb] ${type}/${slug} page ${page}: ${newOnPage.length} nouvelles`);
-
-      await new Promise((r) => setTimeout(r, 1000));
     } catch {
       break;
     }
