@@ -46,6 +46,8 @@ export const api = {
     request("/api/properties/import", { method: "POST", body: JSON.stringify({ url }) }),
   scanProperties: () =>
     request("/api/properties/scan", { method: "POST" }),
+  getScanProgress: () =>
+    request("/api/properties/scan/progress"),
   getNeighborhood: (propertyId: string) =>
     request(`/api/neighborhood/${propertyId}`),
 };

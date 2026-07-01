@@ -1,10 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../services/api";
 import type { PropertyMatch } from "../../../shared/types";
 import { PhotoCarousel } from "../components/properties/PhotoCarousel";
 import { NeighborhoodCard } from "../components/properties/NeighborhoodCard";
 import { FinancialAnalysisCard } from "../components/properties/FinancialAnalysisCard";
+
+interface ScanProgress {
+  status: "idle" | "running" | "done" | "error";
+  step: number;
+  total: number;
+  source: string;
+  message: string;
+  imported: number;
+  matched: number;
+}
+
+const SCAN_STEPS = ["Immoweb", "Biddit", "Trevi", "Matching"];
+const STEP_ICONS: Record<string, string> = {
+  Immoweb: "🏠", Biddit: "🔨", Trevi: "🏢", Matching: "✨", init: "🚀",
+};
 
 interface DiscoveriesPageProps {
   onCountChange?: (count: number) => void;
@@ -35,8 +50,9 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [discoveries, setDiscoveries] = useState<PropertyMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
   const [hasCriteria, setHasCriteria] = useState<boolean | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     loadDiscoveries();
@@ -46,7 +62,46 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         setHasCriteria(!!(result.preferences && result.preferences.budget_max));
       })
       .catch(() => setHasCriteria(false));
+
+    // Reprendre le polling si un scan était déjà en cours (rechargement de page)
+    api.getScanProgress()
+      .then((p: unknown) => {
+        const prog = p as ScanProgress;
+        if (prog.status === "running") {
+          setScanning(true);
+          setScanProgress(prog);
+          startPolling();
+        }
+      })
+      .catch(() => {});
+
+    return () => stopPolling();
   }, []);
+
+  const startPolling = () => {
+    if (pollRef.current) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        const p = (await api.getScanProgress()) as ScanProgress;
+        setScanProgress(p);
+        if (p.status === "done" || p.status === "error") {
+          stopPolling();
+          setScanning(false);
+          if (p.status === "done") loadDiscoveries();
+        }
+      } catch {
+        stopPolling();
+        setScanning(false);
+      }
+    }, 3000);
+  };
+
+  const stopPolling = () => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  };
 
   const loadDiscoveries = async () => {
     setLoading(true);
@@ -64,14 +119,12 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
 
   const handleScan = async () => {
     setScanning(true);
-    setScanResult(null);
+    setScanProgress(null);
     try {
       await api.scanProperties();
-      setScanResult("Scan lancé ! Les résultats apparaîtront dans les Découvertes dans 2-5 minutes. Revenez ici pour les voir.");
-      setTimeout(() => loadDiscoveries(), 10000);
+      startPolling();
     } catch (err) {
-      setScanResult(err instanceof Error ? err.message : "Erreur lors du lancement du scan");
-    } finally {
+      setScanProgress({ status: "error", step: 0, total: 4, source: "", message: err instanceof Error ? err.message : "Erreur lors du lancement du scan", imported: 0, matched: 0 });
       setScanning(false);
     }
   };
@@ -133,14 +186,59 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
             {scanning ? "Scan en cours..." : "Lancer le scan"}
           </button>
         </div>
-        {scanning && (
-          <div className="mt-4 bg-blue-50 text-blue-700 p-3 rounded-lg text-sm">
-            Lancement du scan en cours...
-          </div>
-        )}
-        {scanResult && !scanning && (
-          <div className="mt-4 bg-green-50 text-green-700 p-3 rounded-lg text-sm">
-            {scanResult}
+
+        {/* Barre de progression */}
+        {(scanning || scanProgress?.status === "done" || scanProgress?.status === "error") && scanProgress && (
+          <div className="mt-4">
+            {/* Étapes */}
+            <div className="flex items-center gap-1 mb-3">
+              {SCAN_STEPS.map((step, i) => {
+                const stepNum = i + 1;
+                const isDone = scanProgress.step > stepNum || scanProgress.status === "done";
+                const isActive = scanProgress.source === step || (scanProgress.step === stepNum && scanning);
+                return (
+                  <div key={step} className="flex items-center flex-1">
+                    <div className={`flex-1 flex flex-col items-center gap-1`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${
+                        isDone ? "bg-green-500 text-white" :
+                        isActive ? "bg-blue-500 text-white animate-pulse" :
+                        "bg-gray-100 text-gray-400"
+                      }`}>
+                        {isDone ? "✓" : STEP_ICONS[step] || "•"}
+                      </div>
+                      <span className={`text-[10px] font-medium ${isActive ? "text-blue-600" : isDone ? "text-green-600" : "text-gray-400"}`}>
+                        {step}
+                      </span>
+                    </div>
+                    {i < SCAN_STEPS.length - 1 && (
+                      <div className={`flex-1 h-0.5 mb-4 transition-all ${isDone ? "bg-green-400" : "bg-gray-200"}`} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Barre de progression globale */}
+            <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+              <div
+                className={`h-2 rounded-full transition-all duration-700 ${
+                  scanProgress.status === "done" ? "bg-green-500" :
+                  scanProgress.status === "error" ? "bg-red-400" : "bg-blue-500"
+                }`}
+                style={{ width: `${scanProgress.status === "done" ? 100 : (scanProgress.step / scanProgress.total) * 100}%` }}
+              />
+            </div>
+
+            {/* Message */}
+            <p className={`text-xs mt-1 ${
+              scanProgress.status === "error" ? "text-red-500" :
+              scanProgress.status === "done" ? "text-green-600 font-medium" : "text-gray-500"
+            }`}>
+              {scanProgress.message}
+              {scanProgress.status === "running" && scanProgress.imported > 0 && (
+                <span className="ml-2 text-blue-500 font-medium">{scanProgress.imported} biens trouvés</span>
+              )}
+            </p>
           </div>
         )}
       </div>

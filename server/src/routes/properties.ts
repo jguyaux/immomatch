@@ -2,20 +2,44 @@ import { Router, Response } from "express";
 import { requireAuth, AuthenticatedRequest } from "../middleware/auth.js";
 import { importProperty } from "../controllers/propertiesController.js";
 import { runDailyScanWithProgress } from "../jobs/dailyScan.js";
+import { getScanProgress, updateScanProgress } from "../services/scanProgress.js";
 
 const router = Router();
 
 router.post("/import", requireAuth, (req, res) => importProperty(req as AuthenticatedRequest, res));
 
-router.post("/scan", requireAuth, async (_req, res: Response) => {
-  // Repondre immediatement et lancer le scan en arriere-plan
-  res.json({ status: "started", message: "Scan lance en arriere-plan. Verifiez les Decouvertes dans quelques minutes." });
+router.get("/scan/progress", requireAuth, (_req, res: Response) => {
+  res.json(getScanProgress());
+});
 
-  // Fire and forget — ne pas attendre la fin
-  runDailyScanWithProgress(() => {}).then((result) => {
-    console.log(`[Scan] Termine: ${result.imported} importes, ${result.matched} matchs`);
+router.post("/scan", requireAuth, async (_req, res: Response) => {
+  const current = getScanProgress();
+  if (current.status === "running") {
+    res.json({ status: "already_running" });
+    return;
+  }
+
+  updateScanProgress({ status: "running", step: 0, startedAt: Date.now(), imported: 0, matched: 0, source: "", message: "Démarrage du scan..." });
+  res.json({ status: "started" });
+
+  runDailyScanWithProgress((data) => {
+    updateScanProgress({
+      step: (data.step as number) ?? 0,
+      total: (data.total as number) ?? 4,
+      source: (data.source as string) ?? "",
+      message: (data.message as string) ?? "",
+    });
+  }).then((result) => {
+    updateScanProgress({
+      status: "done",
+      step: 4,
+      source: "",
+      message: `Scan terminé — ${result.imported} biens importés, ${result.matched} matchs créés`,
+      imported: result.imported,
+      matched: result.matched,
+    });
   }).catch((err) => {
-    console.error("[Scan] Erreur:", err);
+    updateScanProgress({ status: "error", message: err instanceof Error ? err.message : "Erreur inconnue" });
   });
 });
 
