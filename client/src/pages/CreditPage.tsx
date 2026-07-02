@@ -87,8 +87,8 @@ export function CreditPage() {
               <label className="text-sm font-medium">Prix (€)</label>
               <input
                 type="number"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
+                value={price || ""}
+                onChange={(e) => setPrice(e.target.value === "" ? 0 : Number(e.target.value))}
                 className="w-32 px-3 py-1.5 border rounded-lg text-right text-sm"
                 step={5000}
                 min={0}
@@ -137,8 +137,8 @@ export function CreditPage() {
               <label className="text-sm font-medium">Apport (€)</label>
               <input
                 type="number"
-                value={downPayment}
-                onChange={(e) => setDownPayment(Number(e.target.value))}
+                value={downPayment || ""}
+                onChange={(e) => setDownPayment(e.target.value === "" ? 0 : Number(e.target.value))}
                 className="w-32 px-3 py-1.5 border rounded-lg text-right text-sm"
                 step={5000}
                 min={0}
@@ -192,8 +192,8 @@ export function CreditPage() {
               <label className="text-sm font-medium">Revenus nets</label>
               <input
                 type="number"
-                value={netIncome}
-                onChange={(e) => setNetIncome(Number(e.target.value))}
+                value={netIncome || ""}
+                onChange={(e) => setNetIncome(e.target.value === "" ? 0 : Number(e.target.value))}
                 className="w-32 px-3 py-1.5 border rounded-lg text-right text-sm"
                 step={100}
                 min={0}

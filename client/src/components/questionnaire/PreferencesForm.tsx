@@ -125,8 +125,8 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             </label>
             <input
               type="number"
-              value={form.budgetMin}
-              onChange={(e) => setForm({ ...form, budgetMin: Number(e.target.value) })}
+              value={form.budgetMin || ""}
+              onChange={(e) => setForm({ ...form, budgetMin: e.target.value === "" ? 0 : Number(e.target.value) })}
               className="w-full px-3 py-2 border rounded-lg"
               step={form.transactionType === "location" ? 50 : 10000}
               min={0}
@@ -138,8 +138,8 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             </label>
             <input
               type="number"
-              value={form.budgetMax}
-              onChange={(e) => setForm({ ...form, budgetMax: Number(e.target.value) })}
+              value={form.budgetMax || ""}
+              onChange={(e) => setForm({ ...form, budgetMax: e.target.value === "" ? 0 : Number(e.target.value) })}
               className="w-full px-3 py-2 border rounded-lg"
               step={form.transactionType === "location" ? 50 : 10000}
               min={0}
@@ -184,8 +184,8 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             <label className="block text-sm font-medium mb-1">Chambres min</label>
             <input
               type="number"
-              value={form.bedroomsMin}
-              onChange={(e) => setForm({ ...form, bedroomsMin: Number(e.target.value) })}
+              value={form.bedroomsMin || ""}
+              onChange={(e) => setForm({ ...form, bedroomsMin: e.target.value === "" ? 0 : Number(e.target.value) })}
               className="w-full px-3 py-2 border rounded-lg"
               min={0}
               max={10}
@@ -209,8 +209,8 @@ export function PreferencesForm({ initialData, onSubmit }: PreferencesFormProps)
             <label className="block text-sm font-medium mb-1">SDB min</label>
             <input
               type="number"
-              value={form.bathroomsMin}
-              onChange={(e) => setForm({ ...form, bathroomsMin: Number(e.target.value) })}
+              value={form.bathroomsMin || ""}
+              onChange={(e) => setForm({ ...form, bathroomsMin: e.target.value === "" ? 0 : Number(e.target.value) })}
               className="w-full px-3 py-2 border rounded-lg"
               min={0}
               max={5}
