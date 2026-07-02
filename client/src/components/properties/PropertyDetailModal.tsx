@@ -4,6 +4,7 @@ import type { PropertyMatch } from "../../../../shared/types";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { NeighborhoodCard } from "./NeighborhoodCard";
 import { FinancialAnalysisCard } from "./FinancialAnalysisCard";
+import { getDisplayTitle } from "../../utils/formatters";
 
 interface Props {
   match: PropertyMatch;
@@ -78,7 +79,7 @@ export function PropertyDetailModal({ match, onClose, onFavorite, onDismiss }: P
           {/* Header */}
           <div>
             <div className="flex justify-between items-start gap-4">
-              <h2 className="text-xl font-bold leading-tight">{property.title}</h2>
+              <h2 className="text-xl font-bold leading-tight">{getDisplayTitle(property)}</h2>
               <div className="text-right flex-shrink-0">
                 <p className="text-2xl font-bold text-primary-600">{property.price.toLocaleString("fr-BE")} €</p>
                 {property.surface && (

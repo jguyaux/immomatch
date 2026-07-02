@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import type { PropertyMatch } from "../../../../shared/types";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { useCompare } from "../../App";
+import { getDisplayTitle } from "../../utils/formatters";
 import { NeighborhoodCard } from "./NeighborhoodCard";
 import { FinancialAnalysisCard } from "./FinancialAnalysisCard";
 
@@ -77,7 +78,7 @@ export function PropertyCard({ match, onFavorite, onDismiss, onDetail }: Propert
 
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-lg leading-tight line-clamp-2 flex-1">{property.title}</h3>
+          <h3 className="font-semibold text-lg leading-tight line-clamp-2 flex-1">{getDisplayTitle(property)}</h3>
           <div className="text-right ml-3 flex-shrink-0">
             <span className="text-lg font-bold text-primary-600 whitespace-nowrap">
               {property.price.toLocaleString("fr-BE")} €

@@ -5,6 +5,7 @@ import type { PropertyMatch } from "../../../shared/types";
 import { PhotoCarousel } from "../components/properties/PhotoCarousel";
 import { NeighborhoodCard } from "../components/properties/NeighborhoodCard";
 import { FinancialAnalysisCard } from "../components/properties/FinancialAnalysisCard";
+import { getDisplayTitle } from "../utils/formatters";
 
 interface ScanProgress {
   status: "idle" | "running" | "done" | "error";
@@ -384,7 +385,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
                       {/* Header : titre + prix + score */}
                       <div className="flex justify-between items-start gap-2 mb-2">
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold leading-tight text-sm sm:text-base line-clamp-2">{property.title}</h3>
+                          <h3 className="font-semibold leading-tight text-sm sm:text-base line-clamp-2">{getDisplayTitle(property)}</h3>
                           <p className="text-xs text-gray-500 mt-0.5">
                             {property.city}{property.zipCode && ` (${property.zipCode})`}
                           </p>
