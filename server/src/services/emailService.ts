@@ -1,5 +1,5 @@
 const RESEND_API_URL = "https://api.resend.com/emails";
-const FROM = "ImmoMatch <noreply@immomatch.app>";
+const FROM = "ImmoMatch <onboarding@resend.dev>";
 
 export async function sendMatchNotification(to: string, matchCount: number): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
