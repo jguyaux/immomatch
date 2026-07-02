@@ -61,6 +61,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
+  const [sourceResults, setSourceResults] = useState<Record<string, number>>({});
   const [hasCriteria, setHasCriteria] = useState<boolean | null>(null);
   const [minScore, setMinScore] = useState(50);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -95,6 +96,13 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
       try {
         const p = (await api.getScanProgress()) as ScanProgress;
         setScanProgress(p);
+        // Capturer le nombre de biens par source quand une étape se termine
+        if (p.source && ["Immoweb", "Biddit", "Trevi"].includes(p.source)) {
+          const countMatch = p.message.match(/^(\d+) biens? trouvés?/);
+          if (countMatch) {
+            setSourceResults((prev) => ({ ...prev, [p.source]: parseInt(countMatch[1]) }));
+          }
+        }
         if (p.status === "done" || p.status === "error") {
           stopPolling();
           setScanning(false);
@@ -155,6 +163,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const handleScan = async () => {
     setScanning(true);
     setScanProgress(null);
+    setSourceResults({});
     try {
       await api.scanProperties();
       startPolling();
@@ -264,16 +273,24 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
               />
             </div>
 
-            {/* Message */}
+            {/* Message + résultats par source */}
             <p className={`text-xs mt-1 ${
               scanProgress.status === "error" ? "text-red-500" :
               scanProgress.status === "done" ? "text-green-600 font-medium" : "text-gray-500"
             }`}>
               {scanProgress.message}
-              {scanProgress.status === "running" && scanProgress.imported > 0 && (
-                <span className="ml-2 text-blue-500 font-medium">{scanProgress.imported} biens trouvés</span>
-              )}
             </p>
+            {Object.keys(sourceResults).length > 0 && (
+              <div className="flex gap-3 mt-2">
+                {["Immoweb", "Biddit", "Trevi"].filter((s) => s in sourceResults).map((s) => (
+                  <span key={s} className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    sourceResults[s] === 0 ? "bg-gray-100 text-gray-400" : "bg-green-50 text-green-700"
+                  }`}>
+                    {s}: {sourceResults[s]} bien{sourceResults[s] > 1 ? "s" : ""}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

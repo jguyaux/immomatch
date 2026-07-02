@@ -8,19 +8,20 @@ const router = Router();
 
 router.post("/import", requireAuth, (req, res) => importProperty(req as AuthenticatedRequest, res));
 
-router.get("/scan/progress", requireAuth, (_req, res: Response) => {
-  res.json(getScanProgress());
+router.get("/scan/progress", requireAuth, async (_req, res: Response) => {
+  const progress = await getScanProgress();
+  res.json(progress);
 });
 
 router.post("/scan", requireAuth, async (req, res: Response) => {
   const authReq = req as AuthenticatedRequest;
-  const current = getScanProgress();
+  const current = await getScanProgress();
   if (current.status === "running") {
     res.json({ status: "already_running" });
     return;
   }
 
-  updateScanProgress({ status: "running", step: 0, startedAt: Date.now(), imported: 0, matched: 0, source: "", message: "Démarrage du scan..." });
+  await updateScanProgress({ status: "running", step: 0, startedAt: Date.now(), imported: 0, matched: 0, source: "", message: "Démarrage du scan..." });
   res.json({ status: "started" });
 
   runDailyScanWithProgress((data) => {

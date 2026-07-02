@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const REGIONS = [
   { id: "bxl", label: "BXL 12.5%", rate: 0.125 },
@@ -19,8 +20,17 @@ function calculateMonthly(principal: number, annualRate: number, years: number):
 }
 
 export function CreditPage() {
-  const [price, setPrice] = useState(350000);
+  const [searchParams] = useSearchParams();
+  const [price, setPrice] = useState(() => {
+    const p = parseInt(searchParams.get("price") ?? "");
+    return isNaN(p) ? 350000 : p;
+  });
   const [region, setRegion] = useState("wal1");
+
+  useEffect(() => {
+    const p = parseInt(searchParams.get("price") ?? "");
+    if (!isNaN(p)) setPrice(p);
+  }, [searchParams]);
   const [downPayment, setDownPayment] = useState(150000);
   const [duration, setDuration] = useState(25);
   const [rate, setRate] = useState(3.4);

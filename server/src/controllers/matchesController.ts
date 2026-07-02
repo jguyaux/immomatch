@@ -50,7 +50,7 @@ function mapMatch(row: any) {
 
 export async function getMatches(req: AuthenticatedRequest, res: Response) {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const limit = parseInt(req.query.limit as string) || 30;
   const offset = (page - 1) * limit;
   const sortBy = (req.query.sortBy as string) || "score";
 

@@ -89,6 +89,26 @@ async function getUserPreferences(userId: string): Promise<UserPreferences | nul
   };
 }
 
+const SOURCE_PRIORITY = ["immoweb", "trevi", "biddit"];
+
+function deduplicateCrossSource(properties: Property[]): Property[] {
+  const seen = new Map<string, Property>();
+  for (const p of properties) {
+    if (!p.city || !p.price) { seen.set(p.id, p); continue; }
+    // Clé = ville + tranche de prix (±10k) + tranche de surface (±20m²)
+    const key = `${normalize(p.city)}-${Math.round(p.price / 10000)}-${p.surface ? Math.round(p.surface / 20) : "x"}`;
+    const existing = seen.get(key);
+    if (!existing) {
+      seen.set(key, p);
+    } else {
+      const ep = SOURCE_PRIORITY.findIndex((s) => existing.source.toLowerCase().includes(s));
+      const np = SOURCE_PRIORITY.findIndex((s) => p.source.toLowerCase().includes(s));
+      if (np !== -1 && (ep === -1 || np < ep)) seen.set(key, p);
+    }
+  }
+  return [...seen.values()];
+}
+
 async function getUnscoredProperties(userId: string, prefs: UserPreferences): Promise<Property[]> {
   // Exclure les propriétés déjà validées ou dismissées manuellement par l'utilisateur.
   // Les matches en attente (pending) ont été supprimés avant cet appel — leurs propriétés
@@ -109,7 +129,7 @@ async function getUnscoredProperties(userId: string, prefs: UserPreferences): Pr
   const { data } = await query;
   if (!data) return [];
 
-  const allProperties = data.map((d) => ({
+  const allProperties = deduplicateCrossSource(data.map((d) => ({
     id: d.id,
     externalId: d.external_id,
     source: d.source,
@@ -132,7 +152,7 @@ async function getUnscoredProperties(userId: string, prefs: UserPreferences): Pr
     rawData: d.raw_data,
     scrapedAt: d.scraped_at,
     createdAt: d.created_at,
-  })) as Property[];
+  })) as Property[]);
 
   const excludedTypes = ["terrain", "immeuble"];
   const excludedTitleWords = [

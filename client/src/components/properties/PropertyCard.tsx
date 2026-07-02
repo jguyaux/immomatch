@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { PropertyMatch } from "../../../../shared/types";
 import { PhotoCarousel } from "./PhotoCarousel";
 import { useCompare } from "../../App";
@@ -8,6 +9,7 @@ interface PropertyCardProps {
   match: PropertyMatch;
   onFavorite: (id: string, isFavorite: boolean) => void;
   onDismiss: (id: string) => void;
+  onDetail?: (match: PropertyMatch) => void;
 }
 
 function getSourceLabel(source: string): { label: string; color: string } {
@@ -45,9 +47,10 @@ function getScoreStyle(score: number): string {
   return "from-red-400 to-red-600 text-white";
 }
 
-export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps) {
+export function PropertyCard({ match, onFavorite, onDismiss, onDetail }: PropertyCardProps) {
   if (!match.property) return null;
   const property = match.property;
+  const navigate = useNavigate();
   const { addToCompare, removeFromCompare, isInCompare } = useCompare();
 
   const sourceInfo = getSourceLabel(property.source);
@@ -134,6 +137,14 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
         <FinancialAnalysisCard match={match} />
 
         <div className="flex flex-wrap gap-2 pt-3 border-t">
+          {onDetail && (
+            <button
+              onClick={() => onDetail(match)}
+              className="w-full py-1.5 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-700 transition mb-1"
+            >
+              Voir le détail complet
+            </button>
+          )}
           <button
             onClick={() => onFavorite(match.id, !match.isFavorite)}
             className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition ${
@@ -142,7 +153,7 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
                 : "bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-red-600"
             }`}
           >
-            {match.isFavorite ? "Favori" : "Ajouter aux favoris"}
+            {match.isFavorite ? "Favori" : "Favoris"}
           </button>
           <a
             href={property.url}
@@ -153,17 +164,19 @@ export function PropertyCard({ match, onFavorite, onDismiss }: PropertyCardProps
             {getSourceLink(property.source)}
           </a>
           <button
-            onClick={() =>
-              inCompare ? removeFromCompare(match.id) : addToCompare(match)
-            }
-            className={`py-1.5 px-3 rounded-lg text-sm font-medium transition ${
-              inCompare
-                ? "bg-primary-100 text-primary-700"
-                : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-600"
-            }`}
-            title={inCompare ? "Retirer du comparateur" : "Ajouter au comparateur"}
+            onClick={() => navigate(`/credit?price=${property.price}`)}
+            className="py-1.5 px-3 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition"
+            title="Simuler le crédit"
           >
-            {inCompare ? "Comparateur -" : "Comparer"}
+            Crédit
+          </button>
+          <button
+            onClick={() => inCompare ? removeFromCompare(match.id) : addToCompare(match)}
+            className={`py-1.5 px-3 rounded-lg text-sm font-medium transition ${
+              inCompare ? "bg-primary-100 text-primary-700" : "bg-gray-50 text-gray-500 hover:bg-primary-50 hover:text-primary-600"
+            }`}
+          >
+            {inCompare ? "Comparer -" : "Comparer"}
           </button>
           <button
             onClick={() => onDismiss(match.id)}
