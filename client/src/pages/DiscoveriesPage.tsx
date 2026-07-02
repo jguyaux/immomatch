@@ -46,6 +46,13 @@ function getSourceLabel(source: string): { label: string; color: string } {
   return { label: "Immoweb", color: "bg-blue-600 text-white" };
 }
 
+const SCORE_FILTERS = [
+  { label: "Tous", value: 50 },
+  { label: "≥ 65", value: 65 },
+  { label: "≥ 75", value: 75 },
+  { label: "≥ 85", value: 85 },
+] as const;
+
 export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [discoveries, setDiscoveries] = useState<PropertyMatch[]>([]);
   const [total, setTotal] = useState(0);
@@ -55,10 +62,11 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState<ScanProgress | null>(null);
   const [hasCriteria, setHasCriteria] = useState<boolean | null>(null);
+  const [minScore, setMinScore] = useState(50);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    loadDiscoveries();
+    loadDiscoveries(minScore);
     api.getPreferences()
       .then((data: unknown) => {
         const result = data as { preferences: Record<string, unknown> | null };
@@ -106,11 +114,11 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     }
   };
 
-  const loadDiscoveries = async () => {
+  const loadDiscoveries = async (score = minScore) => {
     setLoading(true);
     setPage(1);
     try {
-      const data = (await api.getDiscoveries(1)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
+      const data = (await api.getDiscoveries(1, score)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
       const list = data.discoveries || [];
       setDiscoveries(list);
       setTotal(data.pagination?.total ?? list.length);
@@ -126,7 +134,7 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const data = (await api.getDiscoveries(nextPage)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
+      const data = (await api.getDiscoveries(nextPage, minScore)) as { discoveries: PropertyMatch[]; pagination: { total: number } };
       const newItems = data.discoveries || [];
       setDiscoveries((prev) => [...prev, ...newItems]);
       setPage(nextPage);
@@ -136,6 +144,12 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
     } finally {
       setLoadingMore(false);
     }
+  };
+
+  const handleScoreFilter = (score: number) => {
+    setMinScore(score);
+    setDiscoveries([]);
+    loadDiscoveries(score);
   };
 
   const handleScan = async () => {
@@ -264,10 +278,29 @@ export function DiscoveriesPage({ onCountChange }: DiscoveriesPageProps) {
         )}
       </div>
 
-      <h2 className="text-xl font-bold mb-1">Découvertes</h2>
-      <p className="text-gray-500 text-sm mb-4">
-        Biens trouvés automatiquement. Validez ceux qui vous intéressent pour les ajouter à vos matchs.
-      </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-xl font-bold mb-0.5">Découvertes</h2>
+          <p className="text-gray-500 text-sm">
+            Biens trouvés automatiquement. Validez ceux qui vous intéressent pour les ajouter à vos matchs.
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 bg-gray-100 rounded-xl p-1 self-start sm:self-auto flex-shrink-0">
+          {SCORE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => handleScoreFilter(f.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                minScore === f.value
+                  ? "bg-white shadow text-gray-800"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {loading ? (
         <div className="text-center py-12 text-gray-500">Chargement...</div>

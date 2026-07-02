@@ -33,8 +33,8 @@ export const api = {
     request("/api/preferences", { method: "PUT", body: JSON.stringify(data) }),
   getMatches: (page = 1, sortBy = "score") =>
     request(`/api/matches?page=${page}&sortBy=${sortBy}`),
-  getDiscoveries: (page = 1) =>
-    request(`/api/matches/discoveries?page=${page}`),
+  getDiscoveries: (page = 1, minScore = 50) =>
+    request(`/api/matches/discoveries?page=${page}&minScore=${minScore}`),
   getDiscoveriesCount: () =>
     request<{ count: number }>("/api/matches/discoveries/count"),
   getFavorites: () => request("/api/matches/favorites"),

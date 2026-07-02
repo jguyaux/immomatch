@@ -126,13 +126,39 @@ export async function scanImmoweb(
     combinations.map(({ zone, type }) => fetchSearchResults(type, transaction, zone))
   );
 
-  const allUrls: string[] = [];
-  for (const r of allUrlsArrays) {
-    if (r.status === "fulfilled") allUrls.push(...r.value);
+  // Grouper par zone pour pouvoir interleaver en round-robin
+  const urlsByZone = new Map<string, string[]>();
+  for (let i = 0; i < combinations.length; i++) {
+    const r = allUrlsArrays[i];
+    if (r.status === "fulfilled") {
+      const zone = combinations[i].zone;
+      if (!urlsByZone.has(zone)) urlsByZone.set(zone, []);
+      urlsByZone.get(zone)!.push(...r.value);
+    }
   }
 
-  const uniqueUrls = [...new Set(allUrls)];
-  console.log(`[Immoweb] ${allUrls.length} brutes -> ${uniqueUrls.length} uniques`);
+  // Dédupliquer globalement puis interleaver zone par zone (round-robin)
+  // → chaque localité obtient des slots proportionnels dans le cap MAX_NEW_URLS
+  const globalSeen = new Set<string>();
+  const zoneQueues: string[][] = [];
+  for (const urls of urlsByZone.values()) {
+    const deduped = urls.filter((u) => {
+      if (globalSeen.has(u)) return false;
+      globalSeen.add(u);
+      return true;
+    });
+    if (deduped.length > 0) zoneQueues.push(deduped);
+  }
+
+  const totalRaw = [...urlsByZone.values()].reduce((s, v) => s + v.length, 0);
+  const uniqueUrls: string[] = [];
+  const maxLen = Math.max(...zoneQueues.map((q) => q.length), 0);
+  for (let i = 0; i < maxLen; i++) {
+    for (const queue of zoneQueues) {
+      if (i < queue.length) uniqueUrls.push(queue[i]);
+    }
+  }
+  console.log(`[Immoweb] ${totalRaw} brutes -> ${uniqueUrls.length} uniques (${zoneQueues.length} zone(s))`);
 
   const existingIds = await getExistingExternalIds(
     uniqueUrls.map((u) => `immoweb-${extractId(u)}`)

@@ -83,18 +83,20 @@ export async function getMatches(req: AuthenticatedRequest, res: Response) {
 
 export async function getDiscoveries(req: AuthenticatedRequest, res: Response) {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 50;
-  const offset = (page - 1) * limit;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const minScore = Math.max(50, Math.min(100, parseInt(req.query.minScore as string) || 50));
 
+  // Récupérer tous les matchs en attente triés par score (pas de pagination DB —
+  // on fait la pagination en mémoire après rééquilibrage par ville).
   const { data, error, count } = await supabase
     .from("property_matches")
     .select("*, properties(*)", { count: "exact" })
     .eq("user_id", req.userId)
     .not("is_validated", "eq", true)
     .not("is_dismissed", "eq", true)
-    .gte("score", 50)
+    .gte("score", minScore)
     .order("score", { ascending: false })
-    .range(offset, offset + limit - 1);
+    .limit(2000);
 
   if (error) {
     console.error("[getDiscoveries] Erreur Supabase:", error);
@@ -102,10 +104,37 @@ export async function getDiscoveries(req: AuthenticatedRequest, res: Response) {
     return;
   }
 
-  console.log(`[getDiscoveries] user=${req.userId} count=${count} rows=${data?.length}`);
+  const allMatches = (data || []).map(mapMatch);
+
+  // Grouper par ville
+  const byCity = new Map<string, typeof allMatches>();
+  for (const match of allMatches) {
+    const city = match.property?.city || "autre";
+    if (!byCity.has(city)) byCity.set(city, []);
+    byCity.get(city)!.push(match);
+  }
+
+  const cityQueues = [...byCity.values()];
+  const numCities = cityQueues.length || 1;
+
+  // Quota strict par ville par page : chaque ville contribue au max ceil(limit/numCities)
+  // biens par page, quelle que soit sa taille en base.
+  // Ex : 3 villes, limit=20 → 7 biens max par ville par page.
+  const perCityPerPage = Math.ceil(limit / numCities);
+  const cityOffset = (page - 1) * perCityPerPage;
+
+  const pageItems: typeof allMatches = [];
+  for (const queue of cityQueues) {
+    pageItems.push(...queue.slice(cityOffset, cityOffset + perCityPerPage));
+  }
+  // Trier par score à l'intérieur de la page équilibrée
+  pageItems.sort((a, b) => b.score - a.score);
+  const discoveries = pageItems.slice(0, limit);
+
+  console.log(`[getDiscoveries] user=${req.userId} count=${count} cities=${numCities} perCityPerPage=${perCityPerPage}`);
   res.json({
-    discoveries: (data || []).map(mapMatch),
-    pagination: { page, limit, total: count },
+    discoveries,
+    pagination: { page, limit, total: count || 0 },
   });
 }
 
