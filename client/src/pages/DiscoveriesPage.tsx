@@ -17,9 +17,9 @@ interface ScanProgress {
   matched: number;
 }
 
-const SCAN_STEPS = ["Immoweb", "Biddit", "Trevi", "Matching"];
+const SCAN_STEPS = ["Immoweb", "Matching"];
 const STEP_ICONS: Record<string, string> = {
-  Immoweb: "🏠", Biddit: "🔨", Trevi: "🏢", Matching: "✨", init: "🚀",
+  Immoweb: "🏠", Matching: "✨", init: "🚀",
 };
 
 interface DiscoveriesPageProps {
